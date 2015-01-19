@@ -1,5 +1,5 @@
 {
-  "name": "jasper-build",
+  "name": "grunt-jasper",
   "version": "0.1.0",
   "description": "build and package jasper application",
   "homepage": "https://github.com/jasperjs/jasper-build",

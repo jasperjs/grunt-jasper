@@ -47,7 +47,7 @@ module.exports = function (grunt) {
         },
 
         // Configuration to be run (and then tested).
-        jasper_build: {
+        jasper: {
             singlePage: 'test/index.html',
             appModule: 'spa',
             appPath: 'test/app',
@@ -82,9 +82,9 @@ module.exports = function (grunt) {
 
     // Whenever the "test" task is run, first clean the "tmp" dir, then run this
     // plugin's task(s), then test the result.
-    grunt.registerTask('test', ['clean', 'typescript', 'jasper_build', 'nodeunit']);
+    grunt.registerTask('test', ['clean', 'typescript', 'jasper', 'nodeunit']);
 
     // By default, lint and run all tests.
-    grunt.registerTask('default', ['jasper_build']);
+    grunt.registerTask('default', ['jasper']);
 
 };

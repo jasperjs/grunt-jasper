@@ -23,7 +23,7 @@ var grunt = require('grunt');
 */
 
 var getConfig = function () {
-    return grunt.config('jasper_build');
+    return grunt.config('jasper');
 }
 
 var processSystemPaths = function (path) {
@@ -34,7 +34,7 @@ var processSystemPaths = function (path) {
     return path;
 }
 
-exports.jasper_build = {
+exports.jasper = {
     setUp: function (done) {
         // setup here if necessary
 

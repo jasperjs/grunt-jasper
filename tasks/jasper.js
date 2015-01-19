@@ -10,10 +10,10 @@
 
 module.exports = function (grunt) {
 
-    grunt.registerTask('jasper_build', 'Build jasper application', function (release) {
+    grunt.registerTask('jasper', 'Build jasper application', function (release) {
         grunt.config('package', false);
 
-        grunt.config.requires('jasper_build');
+        grunt.config.requires('jasper');
 
         grunt.task.run([
             // find all areas in project
@@ -30,7 +30,7 @@ module.exports = function (grunt) {
             'jasper-patch-page']);
     });
 
-    grunt.registerTask('jasper-build-release', 'Build and package jasper application', function (release) {
+    grunt.registerTask('jasper-package', 'Build and package jasper application', function (release) {
         grunt.config('package', true);
 
         grunt.task.run([

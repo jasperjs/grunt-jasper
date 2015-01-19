@@ -14,7 +14,7 @@ var JasperUtils = function () {
     };
 
     this.getJasperConfig = function (grunt) {
-        return grunt.config('jasper_build');
+        return grunt.config('jasper');
     };
 
     this.camelCase = function (name) {
