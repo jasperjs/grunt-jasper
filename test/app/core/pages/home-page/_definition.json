@@ -1,0 +1,6 @@
+﻿{
+    "route": "/",
+    "templateFile": "home-page.html",
+    "type": "page",
+    "component": "spa.core.pages.HomePage"
+}
