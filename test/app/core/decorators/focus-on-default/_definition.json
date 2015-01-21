@@ -1,4 +1,4 @@
 ﻿{
     "type": "decorator",
-    "component": "spa.core.decorators.FocusOnDefault"
+    "ctor": "spa.core.decorators.FocusOnDefault"
 }

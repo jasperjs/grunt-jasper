@@ -1,6 +1,6 @@
-# jasper-build
+# grunt-jasper
 
-> build and package jasper application
+> Grunt task for build and package jasper application
 
 ## Getting Started
 This plugin requires Grunt.
@@ -8,77 +8,120 @@ This plugin requires Grunt.
 If you haven't used [Grunt](http://gruntjs.com/) before, be sure to check out the [Getting Started](http://gruntjs.com/getting-started) guide, as it explains how to create a [Gruntfile](http://gruntjs.com/sample-gruntfile) as well as install and use Grunt plugins. Once you're familiar with that process, you may install this plugin with this command:
 
 ```shell
-npm install jasper-build --save-dev
+npm install grunt-jasper --save-dev
 ```
 
 Once the plugin has been installed, it may be enabled inside your Gruntfile with this line of JavaScript:
 
 ```js
-grunt.loadNpmTasks('jasper-build');
+grunt.loadNpmTasks('grunt-jasper');
 ```
 
-## The "jasper_build" task
+## The "jasper" task
 
 ### Overview
-In your project's Gruntfile, add a section named `jasper_build` to the data object passed into `grunt.initConfig()`.
+In your project's Gruntfile, add a section named `jasper` to the data object passed into `grunt.initConfig()`.
 
 ```js
 grunt.initConfig({
-  jasper_build: {
+  jasper: {
     options: {
-      // Task-specific options go here.
+    
     },
-    your_target: {
-      // Target-specific file lists and/or options go here.
-    },
-  },
+
+    target: {
+      options:{
+        package: false
+      }
+    }
+    
+  }
 })
 ```
 
 ### Options
 
-#### options.separator
+#### options.singlePage
 Type: `String`
-Default value: `',  '`
+Default value: `index.html'
 
-A string value that is used to do something with whatever.
+Path to the single page, that will be modified during build process. Page must contain <!-- SCRIPTS --> and <!-- STYLES --> areas
 
-#### options.punctuation
+#### options.appPath
 Type: `String`
-Default value: `'.'`
+Default value: `app'
 
-A string value that is used to do something else with whatever else.
+Path to application root. Task will search areas, components, etc.. in this folder.
+
+#### options.package
+Type: `Boolean`
+Default value: false
+
+If true task will package your application to 'options.packageOutput' path;
+
+#### options.packageOutput
+Type: `String`
+Default value: 'dist'
+
+Specifying destination of application package
+
+#### options.bootstrapScripts
+Type: `Array`
+Default value: []
+
+Specifying array of scripts, which bootstrap application (place in the options.singlePage)
+
+#### options.baseCss
+Type: `Array`
+Default value: []
+
+Specifying array of stylesheet, which need to be referenced to the page before components styles. You can specify here any css framework style (Twitter bootstrap) or normalize styles
 
 ### Usage Examples
 
-#### Default Options
-In this example, the default options are used to do something with whatever. So if the `testing` file has the content `Testing` and the `123` file had the content `1 2 3`, the generated result would be `Testing, 1 2 3.`
+In this example, the options are used to build and package jasper application. Two target are used: for development process (debug) and package (release).
 
 ```js
 grunt.initConfig({
-  jasper_build: {
-    options: {},
-    files: {
-      'dest/default_options': ['src/testing', 'src/123'],
-    },
-  },
-})
-```
-
-#### Custom Options
-In this example, custom options are used to do something else with whatever else. So if the `testing` file has the content `Testing` and the `123` file had the content `1 2 3`, the generated result in this case would be `Testing: 1 2 3 !!!`
-
-```js
-grunt.initConfig({
-  jasper_build: {
+  jasper: {
     options: {
-      separator: ': ',
-      punctuation: ' !!!',
+      singlePage: 'index.html',
+      appPath: 'app',
+
+      packageOutput: 'dist',
+      
+      bootstrapScripts: [
+        'vendor/angularjs/angular.js',
+        'vendor/angularjs/angular-route.js',
+        'vendor/scriptjs/script.js',
+
+        'vendor/jasper/jasper.js',
+
+        '%areas_config%',
+        '%routes_config%',
+        
+        'app/bootstrap.js'
+      ],
+      
+      baseCss: [
+        'vendor/bootstrap/bootstrap.min.css'
+      ],
+
+      defaultRoutePath: '/'
     },
-    files: {
-      'dest/default_options': ['src/testing', 'src/123'],
+
+    debug: {
+      options:{
+        package: false
+      }
     },
-  },
+
+    release: {
+      options: {
+        package: true
+      }
+    }
+  }
 })
 ```
 
@@ -89,4 +132,4 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
 _(Nothing yet)_
 
 ## License
-Copyright (c) 2015 bukharin. Licensed under the MIT license.
+Licensed under the MIT license.

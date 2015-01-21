@@ -1,1 +1,1 @@
-{ "templateFile": "site-footer.html", "type": "component", "component": "spa.core.components.SiteFooter" }
+{ "templateFile": "site-footer.html", "type": "component","ctor": "spa.core.components.SiteFooter" }

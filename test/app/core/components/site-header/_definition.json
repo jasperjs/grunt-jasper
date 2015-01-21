@@ -1,5 +1,5 @@
 ﻿{
     "templateFile": "site-header.html",
     "type": "component",
-    "component": "spa.core.components.SiteHeader"
+    "ctor": "spa.core.components.SiteHeader"
 }

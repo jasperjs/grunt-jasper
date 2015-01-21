@@ -1,1 +1,1 @@
-{ "type": "decorator", "component": "spa.feature.components.RedColor" }
+{ "type": "decorator", "ctor": "spa.feature.components.RedColor" }

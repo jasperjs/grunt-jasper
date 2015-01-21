@@ -1,31 +1,39 @@
 {
   "name": "grunt-jasper",
-  "version": "0.1.0",
-  "description": "build and package jasper application",
-  "homepage": "https://github.com/jasperjs/jasper-build",
-  "repository": "https://github.com/jasperjs/jasper-build",
+  "version": "0.1.7",
+  "description": "Grunt task to build and package jasper application",
+  "homepage": "https://github.com/jasperjs/grunt-jasper",
+  "repository": "https://github.com/jasperjs/grunt-jasper",
   "author": {
     "name": "bukharin",
     "email": "skyliver.ik@gmail.com",
     "url": ""
   },
   "keywords": [
-    "gruntplugin"
+    "gruntplugin",
+    "jasper"
   ],
   "main": "Gruntfile.js",
   "engines": {
     "node": ">= 0.8.0"
   },
   "license": "MIT",
+  "dependencies": {
+    "html-minifier": "^0.6.9"
+  },
   "devDependencies": {
-    "grunt": "~0.4.2",
     "grunt-contrib-clean": "~0.5.0",
     "grunt-contrib-jshint": "~0.8.0",
     "grunt-contrib-nodeunit": "~0.3.0",
-    "grunt-typescript": "^0.6.1",
-    "html-minifier": "^0.6.9",
     "jshint-stylish": "~0.1.5",
-    "load-grunt-tasks": "~0.3.0"
+    "load-grunt-tasks": "~0.3.0",
+    "grunt-contrib-concat": "^0.5.0",
+    "grunt-contrib-cssmin": "^0.11.0",
+    "grunt-contrib-uglify": "^0.7.0",
+    "grunt-typescript": "^0.6.1"
+  },
+  "peerDependencies": {
+    "grunt": "^0.4.0"
   },
   "scripts": {
     "test": "grunt test"

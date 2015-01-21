@@ -1,1 +1,1 @@
-{"name":"currency","type":"filter","component":"spa.feature.filters.Currency"}
+{"name":"currency","type":"filter","ctor":"spa.feature.filters.Currency"}

@@ -13,10 +13,6 @@ var JasperUtils = function () {
         return path.match(/([^\/]*)\/*$/)[1];
     };
 
-    this.getJasperConfig = function (grunt) {
-        return grunt.config('jasper');
-    };
-
     this.camelCase = function (name) {
         var regex = /[A-Z]/g;
         return name.replace(regex, function (letter, pos) {
@@ -75,24 +71,22 @@ var JasperUtils = function () {
                 jsScripts.push(jsScript);
             }
         }
-        // place .init.js at the end of file set
+        // place _init.js at the end of file set
         jsScripts.push(initPath);
         return jsScripts;
     };
 
-    this.getBootstrapScripts = function (grunt) {
-        var bootstrapScripts = this.getJasperConfig(grunt).bootstrapScripts;
-
-        var areasConfigPath = grunt.config('areas_config');
+    this.getBootstrapScripts = function (bootstrapScripts, areasConfigPath, routesConfigPath) {
         for (var i = 0; i < bootstrapScripts.length; i++) {
-            bootstrapScripts[i] = bootstrapScripts[i].replace('%areas_config%', areasConfigPath);
+            bootstrapScripts[i] = bootstrapScripts[i]
+              .replace('%areas_config%', areasConfigPath)
+              .replace('%routes_config%', routesConfigPath);
         }
         return bootstrapScripts;
     };
 
-    this.getAppStyles = function (grunt) {
-        var appPath = this.getJasperConfig(grunt).appPath || 'app';
-        return grunt.file.expand(appPath + '/**/*.css');
+    this.getAppStyles = function (grunt, baseCss, appPath) {
+        return baseCss.concat(grunt.file.expand(appPath + '/**/*.css'));
     };
 };
 

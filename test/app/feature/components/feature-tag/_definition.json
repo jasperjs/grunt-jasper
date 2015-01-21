@@ -1,1 +1,1 @@
-{ "templateFile": "feature-tag.html", "type": "component", "component": "spa.feature.components.FeatureTag" }
+{ "templateFile": "feature-tag.html", "type": "component", "ctor": "spa.feature.components.FeatureTag" }
