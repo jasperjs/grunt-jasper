@@ -1,6 +1,6 @@
 {
   "name": "grunt-jasper",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Grunt task to build and package jasper application",
   "homepage": "https://github.com/jasperjs/grunt-jasper",
   "repository": "https://github.com/jasperjs/grunt-jasper",

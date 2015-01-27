@@ -112,13 +112,13 @@ exports.jasper = {
         var contentParts = [
             'jsp.component({"ctor":"spa.core.components.SiteFooter","name":"siteFooter","templateUrl":"test/app/core/components/site-footer/site-footer.html"})',
             'jsp.template(\'#_page_homePage\',\'<home-page></home-page>\')',
-            'jsp.component({"ctor":"spa.core.components.SiteHeader","name":"siteHeader","templateUrl":"test/app/core/components/site-header/site-header.html"})',
+            'jsp.component({"ctor":"spa.core.components.SiteHeader","attributes":[{"name":"my-attr"},{"name":"on-click","type":"exp"}],"name":"siteHeader","templateUrl":"test/app/core/components/site-header/site-header.html"})',
             'jsp.component({"route":"/","ctor":"spa.core.pages.HomePage"',
             'jsp.decorator({"ctor":"spa.core.decorators.FocusOnDefault","name":"focusOnDefault"})'
         ];
 
         contentParts.forEach(function (part) {
-            test.ok(areaInitContent.indexOf(part) >= 0);
+            test.ok(areaInitContent.indexOf(part) >= 0, '\"'+  part + '\" not found in the ' + areaInitPath);
         });
 
         /* feature area */
@@ -161,4 +161,7 @@ exports.jasper = {
 
         test.done();
     }
+
+
+
 };

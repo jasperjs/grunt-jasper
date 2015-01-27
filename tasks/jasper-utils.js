@@ -88,6 +88,33 @@ var JasperUtils = function () {
     this.getAppStyles = function (grunt, baseCss, appPath) {
         return baseCss.concat(grunt.file.expand(appPath + '/**/*.css'));
     };
+
+    /**
+     * Split attributes definition string by object for jasper client library usage
+     * @param attrs                     string that represents attributes
+     * @returns {name: '', type: ''}    collection of attributes
+     */
+    this.getJasperAttributes = function(attrs) {
+        if(typeof (attrs) ==='string'){
+            var resultAttrs = [];
+
+            var attrsParts = attrs.split(' ');
+            attrsParts.forEach(function(part){
+              var indx =  part.indexOf(':');
+              if(indx > -1){
+                // attr type specified
+                var attrName = part.substring(0, indx);
+                var attrType = part.substring(indx + 1, part.length);
+                resultAttrs.push({name: attrName, type: attrType});
+              }else{
+                resultAttrs.push({name: part});
+              }
+            });
+
+            return resultAttrs;
+        }
+        return attrs;
+    };
 };
 
 module.exports = new JasperUtils();

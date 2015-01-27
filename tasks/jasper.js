@@ -105,6 +105,10 @@ module.exports = function (grunt) {
           def.type = 'component';
         }
 
+        if(def.attributes){
+          def.attributes = utils.getJasperAttributes(def.attributes);
+        }
+
         if (def.type.toUpperCase() === 'PAGE') {
           def.area = area.name;
           pages.push(def);
@@ -297,7 +301,9 @@ module.exports = function (grunt) {
 
     var scriptsHtml = '';
     for (var i = 0; i < scripts.length; i++) {
-      scriptsHtml += '\t<script src="' + scripts[i] + '"></script>\r\n';
+      if (scripts[i]) {
+        scriptsHtml += '\t<script src="' + scripts[i] + '"></script>\r\n';
+      }
     }
     var scriptsRegex = /<!-- SCRIPTS -->([\s\S]*)<!-- \/SCRIPTS -->/gim;
     pageContent = pageContent.replace(scriptsRegex, '<!-- SCRIPTS -->\r\n\r\n' + scriptsHtml + '\r\n\t<!-- /SCRIPTS -->');
@@ -317,7 +323,7 @@ module.exports = function (grunt) {
     var stylesRegex = /<!-- STYLES -->([\s\S]*)<!-- \/STYLES -->/gim;
     pageContent = pageContent.replace(stylesRegex, '<!-- STYLES -->\r\n\r\n' + stylesHtml + '\r\n\t<!-- /STYLES -->');
 
-    var pageToSave = options.package ? grunt.template.process( options.packageOutput + '/index.html') : options.singlePage;
+    var pageToSave = options.package ? grunt.template.process(options.packageOutput + '/index.html') : options.singlePage;
 
     utils.writeContent(grunt, pageToSave, pageContent);
 
