@@ -264,8 +264,6 @@ module.exports = function (grunt) {
         dest: baseDest
       }
 
-      console.log('concat options', concatConf['jasperbase']);
-
       uglifyFiles[baseMinDest] = baseDest;
 
       uglifyConf.dest = {
