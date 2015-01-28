@@ -228,6 +228,8 @@ module.exports = function (grunt) {
      * Combine all script and styles (only when package application)
      */
 
+    var processedBootstrapScripts = utils.getBootstrapScripts(options.bootstrapScripts, areasConfigPath, routesConfigPath);
+
     if (options.package) {
 
       var concatConf = grunt.config('concat') || {};
@@ -235,7 +237,7 @@ module.exports = function (grunt) {
       var cssMinConf = grunt.config('cssmin') || {};
 
       // Build bootstrap scripts first
-      var bootstrapScripts = [];
+      var bootstrapScripts = processedBootstrapScripts;
       var uglifyFiles = {};
       areas.forEach(function (area) {
         if (!area.bootstrap) {
@@ -261,6 +263,8 @@ module.exports = function (grunt) {
         src: bootstrapScripts,
         dest: baseDest
       }
+
+      console.log('concat options', concatConf['jasperbase']);
 
       uglifyFiles[baseMinDest] = baseDest;
 
@@ -296,7 +300,7 @@ module.exports = function (grunt) {
     if (options.package) {
       scripts.push('scripts/_base.min.js');
     } else {
-      scripts = utils.getBootstrapScripts(options.bootstrapScripts, areasConfigPath, routesConfigPath);
+      scripts = processedBootstrapScripts;
     }
 
     var scriptsHtml = '';
