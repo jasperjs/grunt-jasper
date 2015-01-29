@@ -1,4 +1,4 @@
-# grunt-jasper
+# grunt-jasper [![Build Status](https://travis-ci.org/jasperjs/grunt-jasper.svg?branch=master)](https://travis-ci.org/jasperjs/grunt-jasper)
 
 > Grunt task for build and package jasper application
 
