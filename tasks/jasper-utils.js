@@ -43,13 +43,11 @@ var JasperUtils = function () {
             var quotRegexp = /\'/g;
             var breaklineRegexp = /(?:\r\n|\r|\n)/g;
             var first = content.replace(quotRegexp, '\\\'').replace(breaklineRegexp, ' ');
-            console.log(first);
             return first;
         };
 
         var result = minify(source);
         result = result.replace(/(^\s*)/gm, '');
-        console.log(result);
         return escapeContent(result);
     }
 
@@ -76,13 +74,21 @@ var JasperUtils = function () {
         return jsScripts;
     };
 
-    this.getBootstrapScripts = function (bootstrapScripts, areasConfigPath, routesConfigPath) {
-        for (var i = 0; i < bootstrapScripts.length; i++) {
-            bootstrapScripts[i] = bootstrapScripts[i]
-              .replace('%areas_config%', areasConfigPath)
-              .replace('%routes_config%', routesConfigPath);
+    this.getBootstrapScripts = function (bootstrapScripts, areasConfigPath, routesConfigPath, valuesConfigPath) {
+
+      var wildcards = {
+        '%areas_config%': areasConfigPath,
+        '%routes_config%': routesConfigPath,
+        '%values_config%': valuesConfigPath
+      }
+
+      for (var i = 0; i < bootstrapScripts.length; i++) {
+        var scriptPath = bootstrapScripts[i];
+        if(wildcards[scriptPath]){
+          bootstrapScripts[i] = wildcards[scriptPath]
         }
-        return bootstrapScripts;
+      }
+      return bootstrapScripts;
     };
 
     this.getAppStyles = function (grunt, baseCss, appPath) {

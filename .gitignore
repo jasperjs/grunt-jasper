@@ -36,9 +36,7 @@ _ReSharper*/
 
 .idea
 
-test/dist
-test/app/**/*.js
-test/app/**/*.js.map
+test/testApp/dist
 
 JasperBuild.sln
 JasperBuild.csproj

@@ -1,0 +1,4 @@
+﻿{
+    "type": "decorator",
+    "ctrl": "spa.core.decorators.FocusOnDefault"
+}

@@ -9,6 +9,7 @@
 'use strict';
 var utils = require('./jasper-utils.js');
 var templates = require('./jasper-templates.js');
+var path = require('path');
 
 var getRegistrationScript = function (def) {
   var result = '';
@@ -154,7 +155,7 @@ module.exports = function (grunt) {
 
       utils.writeContent(grunt, initFilePath, areaScript);
 
-      console.log('Area "' + area.name + '" init file was built at: "' + initFilePath + '"');
+      grunt.log.writeln('Area "' + area.name + '" init file was built at: "' + initFilePath + '"');
     });
 
     /*
@@ -163,7 +164,7 @@ module.exports = function (grunt) {
      * client-side areas configuration
      */
 
-    var fileName = options.package ? '_areas_release.js' : '_areas.js';
+    var fileName = '_areas.' + this.target + '.js';
     areasConfigPath = options.appPath + '/' + fileName;
 
     var areaConfig = {};
@@ -183,14 +184,15 @@ module.exports = function (grunt) {
 
       if (options.package) {
         if (area.bootstrap) {
-          return;
-        }
-        // during package build each area represents by one .js file
-        config.scripts = ['scripts/' + area.name + '.min.js'];
-        for (var i = area.dependencies.length - 1; i >= 0; i--) {
-          var dependencyArea = findAreaByName(area.dependencies[i]);
-          if (dependencyArea && dependencyArea.bootstrap) {
-            area.dependencies.splice(i, 1);
+          config.dependencies = [];
+        } else {
+          // during package build each area represents by one .js file
+          config.scripts = ['scripts/' + area.name + '.min.js'];
+          for (var i = area.dependencies.length - 1; i >= 0; i--) {
+            var dependencyArea = findAreaByName(area.dependencies[i]);
+            if (dependencyArea && dependencyArea.bootstrap) {
+              area.dependencies.splice(i, 1);
+            }
           }
         }
       } else {
@@ -201,7 +203,7 @@ module.exports = function (grunt) {
 
     var areaConfigScript = templates.areasConfigScript(areaConfig);
     utils.writeContent(grunt, areasConfigPath, areaConfigScript);
-    console.log('Areas configuration was built at: "' + areasConfigPath + '"');
+    grunt.log.writeln('Areas configuration was built at: "' + areasConfigPath + '"');
 
     /*
      * Building client-side routes configuration script (_routes.js)
@@ -218,17 +220,37 @@ module.exports = function (grunt) {
     });
 
     var routesConfigScript = templates.routesConfigScript(routesConfig);
-    var fileName = options.package ? '_routes.release.js' : '_routes.js';
-    routesConfigPath = options.appPath + '/' + fileName;
+    var fileName = '_routes.' + this.target + '.js';
+    var routesConfigPath = options.appPath + '/' + fileName;
 
     utils.writeContent(grunt, routesConfigPath, routesConfigScript);
-    console.log('Routes configuration was built at: "' + routesConfigPath + '"');
+    grunt.log.writeln('Routes configuration was built at: "' + routesConfigPath + '"');
+
+    /*
+     * Building client-side values configuration script (_values.js)
+     */
+
+    if(options.values) {
+      if(!grunt.file.exists(options.values)){
+        grunt.log.error('Values configuration file does not found at: ' + options.values);
+        return;
+      }
+      var valuesConfig  = grunt.file.readJSON(options.values);
+      if(Object.keys(valuesConfig).length){
+        var valuesConfigScript = templates.valuesConfigScript(valuesConfig);
+        var fileName = '_values.' + this.target + '.js';
+        var valuesConfigPath = options.appPath + '/' + fileName;
+
+        utils.writeContent(grunt, valuesConfigPath, valuesConfigScript);
+        grunt.log.writeln('Values configuration was built at: "' + valuesConfigPath + '"');
+      }
+    }
 
     /*
      * Combine all script and styles (only when package application)
      */
 
-    var processedBootstrapScripts = utils.getBootstrapScripts(options.bootstrapScripts, areasConfigPath, routesConfigPath);
+    var processedBootstrapScripts = utils.getBootstrapScripts(options.bootstrapScripts, areasConfigPath, routesConfigPath, valuesConfigPath);
 
     if (options.package) {
 

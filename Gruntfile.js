@@ -28,7 +28,7 @@ module.exports = function (grunt) {
 
     typescript: {
       base: {
-        src: ['test/app/**/*.ts'],
+        src: ['test/testApp/app/**/*.ts'],
         options: {
           module: 'amd', //or commonjs
           target: 'es5', //or es3
@@ -43,16 +43,23 @@ module.exports = function (grunt) {
 
     // Before generating any new files, remove any previously-created files.
     clean: {
-      tests: ['test/app/_routes.js', 'test/app/_areas.js']
+      tests: [
+        'test/testApp/app/_routes.debug.js',
+        'test/testApp/app/_areas.debug.js',
+        'test/testApp/app/_values.debug.js',
+        'test/testApp/app/_values.release.js',
+        'test/testApp/app/_areas.release.js',
+        'test/testApp/app/_routes.release.js',
+        'test/testApp/dist/**/*.*'
+      ]
     },
 
     // Configuration to be run (and then tested).
     jasper: {
       options: {
-        singlePage: 'test/index.html',
-        appPath: 'test/app',
+        singlePage: 'test/testApp/index.html',
+        appPath: 'test/testApp/app',
 
-        packageOutput: 'test/dist',
         bootstrapScripts: [
           'vendor/angularjs/angular.js',
           'vendor/angularjs/angular-route.js',
@@ -61,13 +68,14 @@ module.exports = function (grunt) {
           'vendor/jasper/jasper.js',
 
           '%areas_config%',
+          '%routes_config%',
+          '%values_config%',
 
-          'app/.routes.js',
           'app/bootstrap.js'
         ],
 
         baseCss: [
-          'test/base.css'
+          'test/testApp/base.css'
         ],
 
         defaultRoutePath: '/'
@@ -75,20 +83,23 @@ module.exports = function (grunt) {
 
       debug: {
         options:{
-          package: false
+          package: false,
+          values: 'test/testApp/config/debug.json'
         }
       },
 
       release: {
         options: {
-          package: true
+          package: true,
+          packageOutput: 'test/testApp/dist'
         }
       }
     },
 
     // Unit tests.
     nodeunit: {
-      tests: ['test/*_test.js']
+      build: ['test/build_tests/*_test.js'],
+      package: ['test/package_tests/*_test.js']
     }
 
   });
@@ -98,7 +109,11 @@ module.exports = function (grunt) {
 
   // Whenever the "test" task is run, first clean the "tmp" dir, then run this
   // plugin's task(s), then test the result.
-  grunt.registerTask('test', ['clean', 'typescript', 'jasper:debug', 'nodeunit']);
+  grunt.registerTask('test-build', ['clean', 'typescript', 'jasper:debug', 'nodeunit:build']);
+
+  grunt.registerTask('test-package', ['clean', 'typescript', 'jasper:release', 'nodeunit:package']);
+
+  grunt.registerTask('test', ['test-build', 'test-package']);
 
   // By default, lint and run all tests.
   grunt.registerTask('default', ['jasper']);

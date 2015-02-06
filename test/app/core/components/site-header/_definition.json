@@ -1,6 +1,0 @@
-﻿{
-    "templateFile": "site-header.html",
-    "type": "component",
-    "ctor": "spa.core.components.SiteHeader",
-    "attributes": "my-attr on-click:exp"
-}

@@ -34,6 +34,16 @@ var JasperTemplates = function () {
     return 'angular.module("jasperRouteConfig",[ "jasper" ]).config(["jasperRouteProvider", function(jasperRouteTable){ jasperRouteTable.setup( ' + JSON.stringify(routesConfig) + ' ); }]);';
   }
 
+  this.valuesConfigScript = function(valuesConfig){
+    var registrationScript = '';
+
+    for(var propName in valuesConfig){
+      registrationScript += 'v.register(\"' + propName + '\", ' + JSON.stringify(valuesConfig[propName]) + ');'
+    }
+
+    return 'angular.module("jasperValuesConfig",[ "jasper" ]).config(["jasperValueProvider", function(v){ ' + registrationScript + '  }]);';
+  }
+
 };
 
 module.exports = new JasperTemplates();
