@@ -145,11 +145,11 @@ module.exports = function (grunt) {
      */
 
     areas.forEach(function (area) {
-      var areaScript = 'jsp.areas.initArea(\'' + area.name + '\').then(function() { \n\n';
+      var areaScript = 'jsp.ready(function(){ jsp.areas.initArea("' + area.name + '").then(function() { \n\n';
       area.__defs.forEach(function (def) {
         areaScript += getRegistrationScript(def, area.name);
       });
-      areaScript += '\n});';
+      areaScript += '\n});});';
       var initFilePath = area.__path + '/_init.js';
       area.__initPath = initFilePath;
 
