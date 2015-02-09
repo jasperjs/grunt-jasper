@@ -106,7 +106,7 @@ module.exports = function (grunt) {
           def.type = 'component';
         }
 
-        if(def.attributes){
+        if (def.attributes) {
           def.attributes = utils.getJasperAttributes(def.attributes);
         }
 
@@ -183,17 +183,9 @@ module.exports = function (grunt) {
       area.__scripts = utils.getAreaScripts(grunt, area.__path, area.__initPath);
 
       if (options.package) {
-        if (area.bootstrap) {
-          config.dependencies = [];
-        } else {
+        if (!area.bootstrap) {
           // during package build each area represents by one .js file
           config.scripts = ['scripts/' + area.name + '.min.js'];
-          for (var i = area.dependencies.length - 1; i >= 0; i--) {
-            var dependencyArea = findAreaByName(area.dependencies[i]);
-            if (dependencyArea && dependencyArea.bootstrap) {
-              area.dependencies.splice(i, 1);
-            }
-          }
         }
       } else {
         config.scripts = area.__scripts;
@@ -230,13 +222,13 @@ module.exports = function (grunt) {
      * Building client-side values configuration script (_values.js)
      */
 
-    if(options.values) {
-      if(!grunt.file.exists(options.values)){
+    if (options.values) {
+      if (!grunt.file.exists(options.values)) {
         grunt.log.error('Values configuration file does not found at: ' + options.values);
         return;
       }
-      var valuesConfig  = grunt.file.readJSON(options.values);
-      if(Object.keys(valuesConfig).length){
+      var valuesConfig = grunt.file.readJSON(options.values);
+      if (Object.keys(valuesConfig).length) {
         var valuesConfigScript = templates.valuesConfigScript(valuesConfig);
         var fileName = '_values.' + this.target + '.js';
         var valuesConfigPath = options.appPath + '/' + fileName;
@@ -258,6 +250,31 @@ module.exports = function (grunt) {
       var uglifyConf = grunt.config('uglify') || {};
       var cssMinConf = grunt.config('cssmin') || {};
 
+      var appendedAreas = {};
+
+      var appendAreasScriptsToBootstrap = function (area, allScripts, hops) {
+        if(appendedAreas[area.name]){
+          return; // allready appended
+        }
+        if (hops > 10) {
+          grunt.log.error('Cyclic references found at area ' + area.name);
+          return;
+        }
+        if (area.dependencies && area.dependencies.length) {
+          // if area has dependencies, ensure to append it at first
+          area.dependencies.forEach(function (areaName) {
+            var depArea = findAreaByName(areaName);
+            if (!depArea) {
+              grunt.log.error('Area "' + areaName + '" not found');
+              return;
+            }
+            appendAreasScriptsToBootstrap(depArea, allScripts, hops++);
+          });
+        }
+        allScripts.push.apply(allScripts, area.__scripts);
+        appendedAreas[area.name] = true;
+      }
+
       // Build bootstrap scripts first
       var bootstrapScripts = processedBootstrapScripts;
       var uglifyFiles = {};
@@ -273,7 +290,7 @@ module.exports = function (grunt) {
           uglifyFiles[destMin] = dest;
 
         } else {
-          bootstrapScripts = options.bootstrapScripts.concat(area.__scripts);
+          appendAreasScriptsToBootstrap(area, bootstrapScripts, 0);
         }
       });
 
@@ -281,6 +298,7 @@ module.exports = function (grunt) {
       var baseDest = options.packageOutput + '/scripts/_base.js';
       var baseMinDest = options.packageOutput + '/scripts/_base.min.js';
       var stylesMinDest = options.packageOutput + '/styles/all.min.css';
+
       concatConf['jasperbase'] = {
         src: bootstrapScripts,
         dest: baseDest
