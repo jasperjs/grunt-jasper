@@ -77,6 +77,12 @@ Default value: []
 
 Specifying array of stylesheet, which need to be referenced to the page before components styles. You can specify here any css framework style (Twitter bootstrap) or normalize styles
 
+#### options.values
+Type: `String`
+Default value: []
+
+Specifying application configuration JSON file. Properties from this configuration file will registered as 'values', during task execution.
+
 ### Usage Examples
 
 In this example, the options are used to build and package jasper application. Two target are used: for development process (debug) and package (release).
@@ -87,7 +93,8 @@ grunt.initConfig({
     options: {
       singlePage: 'index.html',
       appPath: 'app',
-
+      values: 'path/to/values.json',
+      
       packageOutput: 'dist',
       
       bootstrapScripts: [
