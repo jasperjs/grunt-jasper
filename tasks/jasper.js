@@ -175,17 +175,24 @@ module.exports = function (grunt) {
           return areas[i];
       }
       return undefined;
-    }
+    };
 
     areas.forEach(function (area) {
       var config = {};
       config.dependencies = area.dependencies;
       area.__scripts = utils.getAreaScripts(grunt, area.__path, area.__initPath);
-
+      area.__scripts = (area.scripts || []).concat(area.__scripts);
       if (options.package) {
+        if(area.bootstrap && area.scripts && area.scripts.length){
+          grunt.log.error('Configuration error: bootstrap area \"' + area.name + '\" must not contains "scripts". Use "bootstrapScripts" instead')
+          return;
+        }
         if (!area.bootstrap) {
+          // get all area external scripts
+          var areaScrtips = utils.excludeAbsScripts(area.__scripts);
           // during package build each area represents by one .js file
-          config.scripts = ['scripts/' + area.name + '.min.js'];
+          areaScrtips.push('scripts/' + area.name + '.min.js');
+          config.scripts = areaScrtips;
         }
       } else {
         config.scripts = area.__scripts;
@@ -213,7 +220,7 @@ module.exports = function (grunt) {
 
     var routesConfigScript = templates.routesConfigScript(routesConfig);
     var fileName = '_routes.' + this.target + '.js';
-    var routesConfigPath = options.appPath + '/' + fileName;
+    routesConfigPath = options.appPath + '/' + fileName;
 
     utils.writeContent(grunt, routesConfigPath, routesConfigScript);
     grunt.log.writeln('Routes configuration was built at: "' + routesConfigPath + '"');
@@ -242,6 +249,7 @@ module.exports = function (grunt) {
      * Combine all script and styles (only when package application)
      */
 
+    // boostrapscripts - scrtips, that are loaded at first (base.js): angular, jasper etc...
     var processedBootstrapScripts = utils.getBootstrapScripts(options.bootstrapScripts, areasConfigPath, routesConfigPath, valuesConfigPath);
 
     if (options.package) {

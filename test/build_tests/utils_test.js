@@ -55,7 +55,43 @@ exports.utils = {
     var result = utils.getJasperAttributes(attributes);
     test.strictEqual(result, attributes);
     test.done();
-  }
+  },
 
+  testAbsUrlDetection: function (test) {
+
+    var params = {
+      '/path/to/script.js': false,
+      'path/to/script.js': false,
+      'http://path.to/script.js': true,
+      'https://path.to/script.js?v=2': true,
+      '//maps.googleapis.com/maps/api/js?key=qwe8&amp;callback=onMapReady': true
+    };
+
+    for(var addr in params){
+      test.ok(utils.isAbsUrl(addr) === params[addr], addr + ' not excepted as abs url');
+    }
+    test.done();
+  },
+
+  testAbsUrlExclution: function (test) {
+
+    var scripts = [
+      'path/to/script.js',
+      '/path/to/script.js',
+      'https://google.com/script.js',
+      'scripts/temp.js'
+    ];
+
+    var absScripts = utils.excludeAbsScripts(scripts);
+    test.ok(absScripts.length === 1, 'Result of exclusion must contains excluded scripts');
+    test.ok(absScripts[0] === 'https://google.com/script.js', 'Result of exclusion must contains excluded scripts');
+
+    test.ok(scripts.length === 3);
+    test.ok(scripts[0] === 'path/to/script.js');
+    test.ok(scripts[1] === '/path/to/script.js');
+    test.ok(scripts[2] === 'scripts/temp.js');
+
+    test.done();
+  }
 
 };

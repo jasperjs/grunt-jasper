@@ -33,12 +33,11 @@ var getConfig = function () {
 var processSystemPaths = function (path) {
   var config = getConfig();
   var wildcards = {
-     '%areas_config%': config.appPath + '/_areas.debug.js',
-     '%values_config%': config.appPath + '/_values.debug.js',
-     '%routes_config%': config.appPath + '/_routes.debug.js'
+    '%areas_config%': config.appPath + '/_areas.debug.js',
+    '%values_config%': config.appPath + '/_values.debug.js',
+    '%routes_config%': config.appPath + '/_routes.debug.js'
   };
-  if(wildcards[path])
-  {
+  if (wildcards[path]) {
     return wildcards[path];
   }
   return path;
@@ -72,7 +71,7 @@ exports.jasper = {
   testIndexPageStyles: function (test) {
     var indexPageContent = grunt.file.read(path.join(appPath, 'index.html'));
     var styles = grunt.file.expand(path.join(appPath, '/app/**/*.css'));
-    var parts = [ 'test/testApp/base.css' ];
+    var parts = ['test/testApp/base.css'];
     styles.forEach(function (path) {
       parts.push('<link rel="stylesheet" href="' + path + '"/>');
     });
@@ -94,6 +93,10 @@ exports.jasper = {
     var scripts = configObject.core.scripts;
 
     var parts = [
+      'test/testApp/scripts/custom.js',
+      '//path/to/external/script.js',
+      'http://another.path/to/external/script.js',
+
       appPath + '/app/core/pages/home-page/HomePage.js',
       appPath + '/app/core/components/site-footer/SiteFooter.js',
       appPath + '/app/core/components/site-header/SiteHeader.js',
@@ -168,7 +171,8 @@ exports.jasper = {
   testRoutesConfig: function (test) {
     var routePath = path.join(appPath, 'app/_routes.debug.js');
     test.ok(grunt.file.exists(routePath));
-    var configObject = testUtils.parseRoutesConfig(routePath);;
+    var configObject = testUtils.parseRoutesConfig(routePath);
+    ;
 
     test.equals(configObject.defaultRoutePath, '/');
     test.ok(configObject.routes);
