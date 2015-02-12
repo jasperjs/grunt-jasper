@@ -45,7 +45,7 @@ var processSystemPaths = function (path) {
 
 var ensurePartsExistence = function (test, content, parts) {
   parts.forEach(function (part) {
-    var contentStr = typeof content === 'string' ? content.substring(0, 100) : JSON.stringify(content);
+    var contentStr = typeof content === 'string' ? content : JSON.stringify(content);
     test.ok(content.indexOf(part) >= 0, 'Part \"' + part + '\" not found in \"' + contentStr + '...\"');
   });
 };
@@ -77,6 +77,18 @@ exports.jasper = {
     test.done();
   },
 
+  testIndexPage: function (test) {
+    var indexPageContent = grunt.file.read(path.join(appPath, 'dist/index.html'));
+
+    var parts = [
+      'styles/all.min.css?v=674b5de99c64a2217612d5847542cba0'
+    ];
+
+    ensurePartsExistence(test, indexPageContent, parts);
+
+    test.done();
+  },
+
   testAreasConfig: function (test) {
     var areaConfigPath = path.join(appPath, 'app/_areas.release.js');
 
@@ -91,13 +103,13 @@ exports.jasper = {
     test.ok(configObject.core.scripts.length === 3, 'Core area must contains 3 scripts after package: 1 area script and 2 external scripts');
     test.ok(configObject.core.scripts[0] === 'http://another.path/to/external/script.js', 'Core area must contains external script');
     test.ok(configObject.core.scripts[1] === '//path/to/external/script.js', 'Core area must contains external script');
-    test.ok(configObject.core.scripts[2] === 'scripts/core.min.js','Core area must contains area script');
+    test.ok(configObject.core.scripts[2] === 'scripts/core.min.js?v=8264c972e5bad2fdf6fc50fcd990151d','Core area must contains area script');
 
     test.strictEqual(configObject.boot.scripts, undefined, 'Scripts of bootstrapped area must be undefined')
 
     ensurePartsExistence(test, configObject.feature.dependencies, ['core']);
-    ensurePartsExistence(test, configObject.core.scripts, ['scripts/core.min.js']);
-    ensurePartsExistence(test, configObject.feature.scripts, ['scripts/feature.min.js']);
+    ensurePartsExistence(test, configObject.core.scripts, ['scripts/core.min.js?v=8264c972e5bad2fdf6fc50fcd990151d']);
+    ensurePartsExistence(test, configObject.feature.scripts, ['scripts/feature.min.js?v=539fe595c896279cdb6caeeb7bff75a7']);
 
     test.done();
   }

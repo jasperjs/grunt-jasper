@@ -83,6 +83,12 @@ Default value: []
 
 Specifying application configuration JSON file. Properties from this configuration file will registered as 'values', during task execution.
 
+#### options.fileVersion
+type: 'Boolean'
+Default value: false
+
+If true task will append MD5 hash of content of application scripts, during package process to avoid client cache. 'scripts/_base.min.js' --> 'scripts/base.min.js?v=c5fa12138e2da9ddb6023f11533777c0'
+
 ### Usage Examples
 
 In this example, the options are used to build and package jasper application. Two target are used: for development process (debug) and package (release).
@@ -125,7 +131,8 @@ grunt.initConfig({
 
     release: {
       options: {
-        package: true
+        package: true,
+        fileVersion: true
       }
     }
   }

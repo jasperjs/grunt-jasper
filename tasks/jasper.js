@@ -9,7 +9,6 @@
 'use strict';
 var utils = require('./jasper-utils.js');
 var templates = require('./jasper-templates.js');
-var path = require('path');
 
 var getRegistrationScript = function (def) {
   var result = '';
@@ -53,15 +52,25 @@ var getRegistrationScript = function (def) {
   return result;
 };
 
+var options, // jasper task options
+  processedBootstrapScripts = [], // scripts defined in the task options
+  baseScripts = [], //scripts which must included in _base.js
+  routesConfigPath, // path to the routes configuration
+  areasConfigPath, // path to areas config file
+  valuesConfigPath, // path to values config
+  pages = [], // found app pages
+  areas = [], // set of found areas
+  target; // current target of the task
+
 module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-cssmin');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-typescript');
 
-  grunt.registerMultiTask('jasper', 'Build jasper application', function (release) {
+  grunt.registerMultiTask('jasper', 'Build jasper application', function () {
     // Merge task-specific and/or target-specific options with these defaults.
-    var options = this.options({
+    options = this.options({
       singlePage: 'index.html',
       appPath: 'app',
       package: false,
@@ -69,15 +78,75 @@ module.exports = function (grunt) {
 
       defaultRoutePath: '/',
       bootstrapScripts: [],
-      baseCss: []
+
+      baseCss: [],
+      /**
+       * Include MD5 hash of file content after package
+       */
+      fileVersion: false
     });
 
-    var areas = [], pages = [], areasConfigPath, routesConfigPath;
+    // pipeline for building jasper application:
+    var pipeline = [
+    /**
+     *  At first we need to find all areas definitions (_area.json) in the project
+     */
+      'jasperCollectAreas',
+    /**
+     * Then on each found area, collect all component definitions (_definition.json)
+     */
+      'jasperCollectDefs',
+    /**
+     * Then we find all area scripts and build area client-side initialization (_init.js),
+     * which tells client what kind of components places in each area
+     */
+      'jasperAreaInit',
+    /**
+     * Now we need to concatenate and minify all areas scripts, templates
+     * Executes only for package process (options.package == true)
+     */
+      'jasperPackageAreas',
+    /**
+     * Now create a client-side areas configuration script (_areas.js) that tell client which areas exists in application,
+     * dependencies between areas, and their script files
+     */
+      'jasperAreasConfig',
+    /**
+     * Now create a client-side values configuration script (_values.js) that tell client which config values exists in application
+     * Executes only if options.values set to true
+     */
+      'jasperValuesConfig',
+    /**
+     * Now create a client-side routes configuration script (_routes.js) that tell client which routes exists in application
+     */
+      'jasperRoutesConfig',
+    /**
+     * After areas, routes and values config was built we need to create bootstrap script (_base.js) that will loaded at
+     * first time and bootstrap the application.
+     * Bootstrap script includes:
+     * - Scripts that marks as bootstrap in jasper.json file: angular.js, jasper.js, any custom user's scripts.
+     * - Areas, routes and values configuration scripts that was built in previous steps
+     * - Areas scripts, which marked as 'bootstrap' (in _area.json)
+     */
+      'jasperPackageBase',
+    /**
+     * Modify single page, include reference to bootstrap scripts and styles.
+     */
+      'jasperPatchIndex'
+    ];
 
-    /* Find all area's definitions (_area.json) files in the app folder */
+    target = this.target;
 
+    grunt.task.run(pipeline);
+
+  });
+
+  /**
+   * Find all area's definitions (_area.json) files in the app folder
+   */
+  grunt.registerTask('jasperCollectAreas', 'Find all areas definitions (_area.json) files in the app folder', function () {
     var areasDefinitionFiles = grunt.file.expand(options.appPath + '/**/_area.json');
-
+    areas = [];
     areasDefinitionFiles.forEach(function (configFile) {
       var area = grunt.file.readJSON(configFile);
       if (!area.dependencies) {
@@ -89,9 +158,12 @@ module.exports = function (grunt) {
       area.__path = utils.getPath(configFile);
       areas.push(area);
     });
+  });
 
-    /* Find all application component's definitions (_definition.json) files */
-
+  /**
+   * Find all application component's definitions (_definition.json) files
+   */
+  grunt.registerTask('jasperCollectDefs', 'Find all application components definitions (_definition.json) files', function () {
     areas.forEach(function (area) {
       var areaDefinitions = [];
       var configurations = grunt.file.expand(area.__path + '/**/_definition.json');
@@ -130,7 +202,7 @@ module.exports = function (grunt) {
               removeComments: true,
               preserveLineBreaks: true
             })
-          }
+          };
           areaDefinitions.push(templateDefinition);
         }
 
@@ -138,12 +210,13 @@ module.exports = function (grunt) {
       });
       area.__defs = areaDefinitions;
     });
+  });
 
-    /*
-     * Building areas initialization files (_.js)
-     * This scripts are lazy-loaded on the page and setup area contents (components, decorators etc)
-     */
-
+  /**
+   * Building areas initialization files (_.js)
+   * This scripts are lazy-loaded on the page and setup area contents (components, decorators etc)
+   */
+  grunt.registerTask('jasperAreaInit', 'Building areas initialization files (_.js)', function () {
     areas.forEach(function (area) {
       var areaScript = 'jsp.ready(function(){ jsp.areas.initArea("' + area.name + '").then(function() { \n\n';
       area.__defs.forEach(function (def) {
@@ -153,21 +226,31 @@ module.exports = function (grunt) {
       var initFilePath = area.__path + '/_init.js';
       area.__initPath = initFilePath;
 
+      // retrieve all area scripts in area folder:
+      area.__scripts = utils.getAreaScripts(grunt, area.__path, area.__initPath);
+      // concat with custom user scripts for this area:
+      area.__scripts = (area.scripts || []).concat(area.__scripts);
+
       utils.writeContent(grunt, initFilePath, areaScript);
 
       grunt.log.writeln('Area "' + area.name + '" init file was built at: "' + initFilePath + '"');
     });
+  });
 
-    /*
-     * Building all areas configuration script (_areas.js)
-     * This script attaches to the @options.singlePage and setup
-     * client-side areas configuration
-     */
+  /**
+   * Task concatenate and uglify areas scripts
+   */
+  grunt.registerTask('jasperPackageAreas', 'Concatenate and uglify areas scripts', function () {
 
-    var fileName = '_areas.' + this.target + '.js';
-    areasConfigPath = options.appPath + '/' + fileName;
+    if (!options.package)
+      return; // execute on package process only
 
-    var areaConfig = {};
+    var runConcatMinify = false;
+    var concatConf = grunt.config('concat') || {};
+    var uglifyConf = grunt.config('uglify') || {};
+    var cssMinConf = grunt.config('cssmin') || {};
+
+    var appendedAreas = {};
 
     var findAreaByName = function (areaName) {
       for (var i = 0; i < areas.length; i++) {
@@ -177,21 +260,102 @@ module.exports = function (grunt) {
       return undefined;
     };
 
+    var appendAreasScriptsToBootstrap = function (area, allScripts, hops) {
+      if (appendedAreas[area.name]) {
+        return; // allready appended
+      }
+      if (hops > 10) {
+        grunt.log.error('Cyclic references found at area ' + area.name);
+        return;
+      }
+      if (area.dependencies && area.dependencies.length) {
+        // if area has dependencies, ensure to append it at first
+        area.dependencies.forEach(function (areaName) {
+          var depArea = findAreaByName(areaName);
+          if (!depArea) {
+            grunt.log.error('Area "' + areaName + '" not found');
+            return;
+          }
+          appendAreasScriptsToBootstrap(depArea, allScripts, hops++);
+        });
+      }
+      allScripts.push.apply(allScripts, area.__scripts);
+      appendedAreas[area.name] = true;
+    };
+
+    // Build bootstrap scripts first
+    var uglifyFiles = {};
+    areas.forEach(function (area) {
+      if (!area.bootstrap) {
+        var dest = options.packageOutput + '/scripts/' + area.name + '.js';
+        var destMin = options.packageOutput + '/scripts/' + area.name + '.min.js';
+        concatConf['jasper_' + area.name] = {
+          src: area.__scripts,
+          dest: dest
+        };
+        uglifyFiles[destMin] = dest;
+        runConcatMinify = true;
+      } else {
+        // append bootstrap area scripts to the _base.js
+        appendAreasScriptsToBootstrap(area, baseScripts, 0);
+      }
+    });
+
+    uglifyConf.dest = {
+      files: uglifyFiles
+    };
+    var stylesMinDest = options.packageOutput + '/styles/all.min.css';
+    cssMinConf['release'] = {
+      files: [{
+        src: utils.getAppStyles(grunt, options.baseCss, options.appPath),
+        dest: stylesMinDest,
+        ext: '.min.css'
+      }]
+    };
+
+    var minifyPipeline = ['cssmin'];
+    grunt.config('cssmin', cssMinConf);
+
+    if(runConcatMinify) {
+      //run concat minify, only if any area to minify
+      grunt.config('uglify', uglifyConf);
+      grunt.config('concat', concatConf);
+      minifyPipeline = minifyPipeline.concat(['concat', 'uglify']);
+    }
+
+    grunt.task.run(minifyPipeline);
+  });
+
+  /**
+   * Building all areas configuration script (_areas.js)
+   * This script attaches to the @options.singlePage and setup
+   * client-side areas configuration
+   */
+  grunt.registerTask('jasperAreasConfig', 'Building all areas configuration script (_areas.js)', function () {
+    var fileName = '_areas.' + target + '.js';
+    areasConfigPath = options.appPath + '/' + fileName;
+
+    var areaConfig = {};
+
     areas.forEach(function (area) {
       var config = {};
       config.dependencies = area.dependencies;
-      area.__scripts = utils.getAreaScripts(grunt, area.__path, area.__initPath);
-      area.__scripts = (area.scripts || []).concat(area.__scripts);
       if (options.package) {
-        if(area.bootstrap && area.scripts && area.scripts.length){
+        if (area.bootstrap && area.scripts && area.scripts.length) {
           grunt.log.error('Configuration error: bootstrap area \"' + area.name + '\" must not contains "scripts". Use "bootstrapScripts" instead')
           return;
         }
+        // if it's a package process and area mark as 'bootstrap' do nothing. This area scripts will included in _base.js
         if (!area.bootstrap) {
           // get all area external scripts
           var areaScrtips = utils.excludeAbsScripts(area.__scripts);
           // during package build each area represents by one .js file
-          areaScrtips.push('scripts/' + area.name + '.min.js');
+          var areaMinScriptReferencePath = 'scripts/' + area.name + '.min.js';
+          if(options.fileVersion) {
+            // append version param for area script filename
+            areaMinScriptReferencePath = utils.appendFileVersion(options.packageOutput + '/' + areaMinScriptReferencePath, areaMinScriptReferencePath);
+          }
+          areaScrtips.push(areaMinScriptReferencePath);
           config.scripts = areaScrtips;
         }
       } else {
@@ -203,10 +367,12 @@ module.exports = function (grunt) {
     var areaConfigScript = templates.areasConfigScript(areaConfig);
     utils.writeContent(grunt, areasConfigPath, areaConfigScript);
     grunt.log.writeln('Areas configuration was built at: "' + areasConfigPath + '"');
+  });
 
-    /*
-     * Building client-side routes configuration script (_routes.js)
-     */
+  /**
+   * Building client-side routes configuration script (_routes.js)
+   */
+  grunt.registerTask('jasperRoutesConfig', 'Building client-side routes configuration script (_routes.js)', function () {
 
     var routesConfig = {
       defaultRoutePath: options.defaultRoutePath,
@@ -219,132 +385,85 @@ module.exports = function (grunt) {
     });
 
     var routesConfigScript = templates.routesConfigScript(routesConfig);
-    var fileName = '_routes.' + this.target + '.js';
+    var fileName = '_routes.' + target + '.js';
     routesConfigPath = options.appPath + '/' + fileName;
 
     utils.writeContent(grunt, routesConfigPath, routesConfigScript);
+
+    processedBootstrapScripts = utils.getBootstrapScripts(options.bootstrapScripts, areasConfigPath, routesConfigPath, valuesConfigPath);
+
     grunt.log.writeln('Routes configuration was built at: "' + routesConfigPath + '"');
+  });
 
-    /*
-     * Building client-side values configuration script (_values.js)
-     */
+  /**
+   * Building client-side values configuration script (_values.js)
+   */
+  grunt.registerTask('jasperValuesConfig', 'Building client-side values configuration script (_values.js)', function () {
+    if(!options.values)
+      return;
 
-    if (options.values) {
-      if (!grunt.file.exists(options.values)) {
-        grunt.log.error('Values configuration file does not found at: ' + options.values);
-        return;
-      }
-      var valuesConfig = grunt.file.readJSON(options.values);
-      if (Object.keys(valuesConfig).length) {
-        var valuesConfigScript = templates.valuesConfigScript(valuesConfig);
-        var fileName = '_values.' + this.target + '.js';
-        var valuesConfigPath = options.appPath + '/' + fileName;
+    if (!grunt.file.exists(options.values)) {
+      grunt.log.error('Values configuration file does not found at: ' + options.values);
+      return;
+    }
+    var valuesConfig = grunt.file.readJSON(options.values);
+    if (Object.keys(valuesConfig).length) {
+      var valuesConfigScript = templates.valuesConfigScript(valuesConfig);
+      var fileName = '_values.' + target + '.js';
+      valuesConfigPath = options.appPath + '/' + fileName;
 
-        utils.writeContent(grunt, valuesConfigPath, valuesConfigScript);
-        grunt.log.writeln('Values configuration was built at: "' + valuesConfigPath + '"');
-      }
+      utils.writeContent(grunt, valuesConfigPath, valuesConfigScript);
+      grunt.log.writeln('Values configuration was built at: "' + valuesConfigPath + '"');
     }
 
-    /*
-     * Combine all script and styles (only when package application)
-     */
+  });
 
-    // boostrapscripts - scrtips, that are loaded at first (base.js): angular, jasper etc...
-    var processedBootstrapScripts = utils.getBootstrapScripts(options.bootstrapScripts, areasConfigPath, routesConfigPath, valuesConfigPath);
 
-    if (options.package) {
+  /**
+   *  Creates _base.js and _base.min.js files
+   */
+  grunt.registerTask('jasperPackageBase', 'Modify single page', function () {
+    if(!options.package)
+      return;
+    // concat base
+    var concatConf = grunt.config('concat') || {};
+    var uglifyConf = grunt.config('uglify') || {};
+    var baseDest = options.packageOutput + '/scripts/_base.js';
 
-      var concatConf = grunt.config('concat') || {};
-      var uglifyConf = grunt.config('uglify') || {};
-      var cssMinConf = grunt.config('cssmin') || {};
+    baseScripts = processedBootstrapScripts.concat(baseScripts);
 
-      var appendedAreas = {};
+    concatConf.jasperbase = {
+      src: baseScripts,
+      dest: baseDest
+    };
 
-      var appendAreasScriptsToBootstrap = function (area, allScripts, hops) {
-        if(appendedAreas[area.name]){
-          return; // allready appended
-        }
-        if (hops > 10) {
-          grunt.log.error('Cyclic references found at area ' + area.name);
-          return;
-        }
-        if (area.dependencies && area.dependencies.length) {
-          // if area has dependencies, ensure to append it at first
-          area.dependencies.forEach(function (areaName) {
-            var depArea = findAreaByName(areaName);
-            if (!depArea) {
-              grunt.log.error('Area "' + areaName + '" not found');
-              return;
-            }
-            appendAreasScriptsToBootstrap(depArea, allScripts, hops++);
-          });
-        }
-        allScripts.push.apply(allScripts, area.__scripts);
-        appendedAreas[area.name] = true;
-      }
+    var files = {};
+    files[options.packageOutput + '/scripts/_base.min.js'] = baseDest;
+    uglifyConf.jasperbase = {
+      files: files
+    };
 
-      // Build bootstrap scripts first
-      var bootstrapScripts = processedBootstrapScripts;
-      var uglifyFiles = {};
-      areas.forEach(function (area) {
-        if (!area.bootstrap) {
-          var dest = options.packageOutput + '/scripts/' + area.name + '.js';
-          var destMin = options.packageOutput + '/scripts/' + area.name + '.min.js';
-          concatConf[area.name] = {
-            src: area.__scripts,
-            dest: dest
-          };
+    grunt.config('concat', concatConf);
+    grunt.config('uglify', uglifyConf);
 
-          uglifyFiles[destMin] = dest;
+    grunt.task.run(['concat:jasperbase', 'uglify:jasperbase']);
 
-        } else {
-          appendAreasScriptsToBootstrap(area, bootstrapScripts, 0);
-        }
-      });
+  });
 
-      // concat base
-      var baseDest = options.packageOutput + '/scripts/_base.js';
-      var baseMinDest = options.packageOutput + '/scripts/_base.min.js';
-      var stylesMinDest = options.packageOutput + '/styles/all.min.css';
-
-      concatConf['jasperbase'] = {
-        src: bootstrapScripts,
-        dest: baseDest
-      }
-
-      uglifyFiles[baseMinDest] = baseDest;
-
-      uglifyConf.dest = {
-        files: uglifyFiles
-      }
-
-      cssMinConf['release'] = {
-        files: [{
-          src: utils.getAppStyles(grunt, options.baseCss, options.appPath),
-          dest: stylesMinDest,
-          ext: '.min.css'
-        }]
-      }
-
-      grunt.config('uglify', uglifyConf);
-      grunt.config('concat', concatConf);
-      grunt.config('areas', areas);
-      grunt.config('cssmin', cssMinConf);
-
-      grunt.task.run(['concat', 'uglify', 'cssmin']);
-
-    }
-
-    /*
-     * Patching index page. Insert all scripts and styles
-     */
-
+  /**
+   * Patching index page. Insert all scripts and styles
+   */
+  grunt.registerTask('jasperPatchIndex', 'Modify single page', function () {
     var pageContent = grunt.file.read(options.singlePage);
 
     /* patch scripts */
     var scripts = [];
     if (options.package) {
-      scripts.push('scripts/_base.min.js');
+      var baseReferencePath = 'scripts/_base.min.js';
+      if (options.fileVersion) {
+        baseReferencePath = utils.appendFileVersion(options.packageOutput + '/' + baseReferencePath, baseReferencePath);
+      }
+      scripts.push(baseReferencePath);
     } else {
       scripts = processedBootstrapScripts;
     }
@@ -361,7 +480,11 @@ module.exports = function (grunt) {
     /* patch css */
     var styles = [];
     if (options.package) {
-      styles.push('styles/all.min.css');
+      var styleReferencePath = 'styles/all.min.css';
+      if (options.fileVersion) {
+        styleReferencePath = utils.appendFileVersion(options.packageOutput + '/' + styleReferencePath, styleReferencePath);
+      }
+      styles.push(styleReferencePath);
     } else {
       styles = utils.getAppStyles(grunt, options.baseCss, options.appPath);
     }
@@ -376,7 +499,6 @@ module.exports = function (grunt) {
     var pageToSave = options.package ? grunt.template.process(options.packageOutput + '/index.html') : options.singlePage;
 
     utils.writeContent(grunt, pageToSave, pageContent);
-
   });
 
 };

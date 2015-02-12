@@ -1,6 +1,8 @@
 ﻿'use strict';
-
+var crypto = require('crypto');
 var minify = require('html-minifier').minify;
+var fs = require('fs');
+var path = require('path');
 
 var JasperUtils = function () {
 
@@ -139,6 +141,15 @@ var JasperUtils = function () {
       }
     }
     return result;
+  };
+
+  this.computeMd5 = function (content) {
+    return crypto.createHash('md5').update(content).digest('hex');
+  };
+
+  this.appendFileVersion = function (filepath, appendTo) {
+    var md5 = this.computeMd5(fs.readFileSync(filepath, 'utf8'));
+    return appendTo + '?v=' + md5;
   };
 };
 

@@ -77,7 +77,7 @@ module.exports = function (grunt) {
         baseCss: [
           'test/testApp/base.css'
         ],
-
+        fileVersion: true,
         defaultRoutePath: '/'
       },
 

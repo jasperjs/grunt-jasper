@@ -92,6 +92,12 @@ exports.utils = {
     test.ok(scripts[2] === 'scripts/temp.js');
 
     test.done();
+  },
+
+  md5: function(test){
+    var hash = utils.computeMd5('test string');
+    test.ok(hash === '6f8db599de986fab7a21625b7916589c', hash + ' is incorrect md5 hash');
+    test.done();
   }
 
 };

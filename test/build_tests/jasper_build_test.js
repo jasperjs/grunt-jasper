@@ -62,7 +62,7 @@ exports.jasper = {
 
     scripts.forEach(function (path) {
       var scriptReferenceText = '<script src="' + processSystemPaths(path) + '"></script>';
-      test.ok(indexPageContent.indexOf(scriptReferenceText) >= 0, 'Page content must contain ' + path + ' reference');
+      test.ok(indexPageContent.indexOf(scriptReferenceText) >= 0, 'Page content must contain ' + processSystemPaths(path) + ' reference');
     });
 
     test.done();
