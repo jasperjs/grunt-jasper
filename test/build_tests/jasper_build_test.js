@@ -99,6 +99,7 @@ exports.jasper = {
 
       appPath + '/app/core/pages/home-page/HomePage.js',
       appPath + '/app/core/components/site-footer/SiteFooter.js',
+      appPath + '/app/core/components/site-footer/SiteFooter2.js',
       appPath + '/app/core/components/site-header/SiteHeader.js',
       appPath + '/app/core/decorators/focus-on-default/FocusOnDefault.js',
       appPath + '/app/core/_init.js'

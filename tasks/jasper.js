@@ -16,7 +16,6 @@ var getRegistrationScript = function (def) {
 
   delete def.type;
   delete def.__path;
-  delete def.templateFile;
 
   switch (type.toUpperCase()) {
     case 'COMPONENT':
@@ -164,12 +163,13 @@ module.exports = function (grunt) {
    * Find all application component's definitions (_definition.json) files
    */
   grunt.registerTask('jasperCollectDefs', 'Find all application components definitions (_definition.json) files', function () {
+
+
     areas.forEach(function (area) {
       var areaDefinitions = [];
       var configurations = grunt.file.expand(area.__path + '/**/_definition.json');
 
-      configurations.forEach(function (config) {
-        var def = grunt.file.readJSON(config);
+      var registerDefinition = function(config, def){
         if (!def.name) {
           var tagName = utils.getParentFolderName(config);
           def.name = utils.camelCaseTagName(tagName);
@@ -191,6 +191,7 @@ module.exports = function (grunt) {
 
         if (def.templateFile) {
           def.templateUrl = def.__path + '/' + def.templateFile;
+          delete def.templateFile;
         }
         // if we package our application, we need to collect all html templates
         if (options.package && def.templateUrl) {
@@ -207,7 +208,19 @@ module.exports = function (grunt) {
         }
 
         areaDefinitions.push(def);
+      };
+
+      configurations.forEach(function (config) {
+        var def = grunt.file.readJSON(config);
+        if(Array.isArray(def)){
+          def.forEach(function(d){
+            registerDefinition(config, d);
+          });
+        }else {
+          registerDefinition(config, def);
+        }
       });
+
       area.__defs = areaDefinitions;
     });
   });

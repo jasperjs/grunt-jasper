@@ -1,1 +1,13 @@
-{ "templateFile": "site-footer.html", "type": "component","ctrl": "spa.core.components.SiteFooter" }
+[
+  {
+    "templateFile": "site-footer.html",
+    "type": "component",
+    "ctrl": "spa.core.components.SiteFooter"
+  },
+  {
+    "templateFile": "site-footer2.html",
+    "name": "siteFooter2",
+    "type": "component",
+    "ctrl": "spa.core.components.SiteFooter2"
+  }
+]
