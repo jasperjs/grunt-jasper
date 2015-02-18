@@ -195,6 +195,10 @@ module.exports = function (grunt) {
         }
 
         if(def.type.toUpperCase() === 'TEMPLATE'){
+          if(!def.templateUrl){
+            grunt.log.error('TemplateFile not defined in ' + def.__path);
+            return;
+          }
           var htmlContent = grunt.file.read(def.templateUrl);
           def.content = utils.minifyHtml(htmlContent, {
             removeComments: true,
