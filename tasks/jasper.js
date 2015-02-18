@@ -193,6 +193,17 @@ module.exports = function (grunt) {
           def.templateUrl = def.__path + '/' + def.templateFile;
           delete def.templateFile;
         }
+
+        if(def.type.toUpperCase() === 'TEMPLATE'){
+          var htmlContent = grunt.file.read(def.templateUrl);
+          def.content = utils.minifyHtml(htmlContent, {
+            removeComments: true,
+            preserveLineBreaks: true
+          });
+          delete def.templateUrl;
+          delete def.templateFile;
+        }
+
         // if we package our application, we need to collect all html templates
         if (options.package && def.templateUrl) {
           var htmlContent = grunt.file.read(def.templateUrl);

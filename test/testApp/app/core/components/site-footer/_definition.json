@@ -9,5 +9,10 @@
     "name": "siteFooter2",
     "type": "component",
     "ctrl": "spa.core.components.SiteFooter2"
+  },
+  {
+    "type": "template",
+    "templateFile": "template.html",
+    "url": "template"
   }
 ]

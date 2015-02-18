@@ -142,7 +142,8 @@ exports.jasper = {
       'jsp.template(\'#_page_homePage\',\'<home-page></home-page>\')',
       'jsp.component({"ctrl":"spa.core.components.SiteHeader","attributes":[{"name":"my-attr"},{"name":"on-click","type":"exp"}],"name":"siteHeader","templateUrl":"test/testApp/app/core/components/site-header/site-header.html"})',
       'jsp.component({"route":"/","ctrl":"spa.core.pages.HomePage"',
-      'jsp.decorator({"ctrl":"spa.core.decorators.FocusOnDefault","name":"focusOnDefault"})'
+      'jsp.decorator({"ctrl":"spa.core.decorators.FocusOnDefault","name":"focusOnDefault"})',
+      'jsp.template(\'template\',\'<p>custom template</p>\');'
     ];
 
     ensurePartsExistence(test, areaInitContent, contentParts);
