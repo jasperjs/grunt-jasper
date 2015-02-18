@@ -41,7 +41,7 @@ var JasperTemplates = function () {
       registrationScript += 'v.register(\"' + propName + '\", ' + JSON.stringify(valuesConfig[propName]) + ');'
     }
 
-    return 'angular.module("jasperValuesConfig",[ "jasper" ]).config(["jasperValueProvider", function(v){ ' + registrationScript + '  }]);';
+    return 'angular.module("jasperValuesConfig",[ "jasper" ]).config(["jasperConstantProvider", function(v){ ' + registrationScript + '  }]);';
   }
 
 };
