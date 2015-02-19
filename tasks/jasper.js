@@ -183,7 +183,8 @@ module.exports = function (grunt) {
         }
 
         if (def.type.toUpperCase() === 'PAGE') {
-          def.area = area.name;
+          if(!def.area)
+            def.area = area.name;
           pages.push(def);
         }
 
