@@ -67,6 +67,7 @@ exports.jasper = {
     var packageFiles = [
       'dist/index.html',
       'dist/styles/all.min.css',
+      'dist/styles/bootstrap.min.css',
       'dist/scripts/_base.min.js',
       'dist/scripts/core.min.js',
       'dist/scripts/feature.min.js',
@@ -81,7 +82,8 @@ exports.jasper = {
     var indexPageContent = grunt.file.read(path.join(appPath, 'dist/index.html'));
 
     var parts = [
-      'styles/all.min.css?v=674b5de99c64a2217612d5847542cba0'
+      'styles/all.min.css?v=674b5de99c64a2217612d5847542cba0',
+      'styles/bootstrap.min.css?v=ade0bdc8a027fad0fc096f35204e25da'
     ];
 
     ensurePartsExistence(test, indexPageContent, parts);

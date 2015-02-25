@@ -245,7 +245,7 @@ module.exports = function (grunt) {
    * Building areas initialization files (_.js)
    * This scripts are lazy-loaded on the page and setup area contents (components, decorators etc)
    */
-  grunt.registerTask('jasperAreaInit', 'Building areas initialization files (_.js)', function () {
+  grunt.registerTask('jasperAreaInit', 'Building areas initialization files (_init.js)', function () {
     areas.forEach(function (area) {
       var areaScript = 'jsp.ready(function(){ jsp.areas.initArea("' + area.name + '").then(function() { \n\n';
       area.__defs.forEach(function (def) {
@@ -333,13 +333,26 @@ module.exports = function (grunt) {
     uglifyConf.dest = {
       files: uglifyFiles
     };
-    var stylesMinDest = options.packageOutput + '/styles/all.min.css';
-    cssMinConf['release'] = {
-      files: [{
-        src: utils.getAppStyles(grunt, options.baseCss, options.appPath),
-        dest: stylesMinDest,
+    var stylesMinDest = options.packageOutput + '/styles/';
+    //determine application css targets
+    var cssTargets = utils.getCssTargets(options.baseCss);
+    var files = [];
+    //build cssmin task configuration
+    for (var i = 0; i < cssTargets.length; i++) {
+      var target = cssTargets[i];
+      var fileConfig = {
+        src: target.files || [],
+        dest: stylesMinDest+ target.filename,
         ext: '.min.css'
-      }]
+      };
+      if(i === cssTargets.length - 1){
+        fileConfig.src = fileConfig.src.concat(grunt.file.expand(options.appPath + '/**/*.css'));
+      }
+      files.push(fileConfig);
+    }
+
+    cssMinConf['release'] = {
+      files: files
     };
 
     var minifyPipeline = ['cssmin'];
@@ -509,11 +522,17 @@ module.exports = function (grunt) {
     /* patch css */
     var styles = [];
     if (options.package) {
-      var styleReferencePath = 'styles/all.min.css';
-      if (options.fileVersion) {
-        styleReferencePath = utils.appendFileVersion(options.packageOutput + '/' + styleReferencePath, styleReferencePath);
+      var cssTargets = utils.getCssTargets(options.baseCss);
+      var styleReferencePath = 'styles/';
+      for (var i = 0; i < cssTargets.length; i++) {
+        var target = cssTargets[i];
+        var cssPath = styleReferencePath + target.filename;
+        if (options.fileVersion) {
+          cssPath = utils.appendFileVersion(options.packageOutput + '/' + cssPath, cssPath);
+        }
+        styles.push(cssPath);
       }
-      styles.push(styleReferencePath);
+
     } else {
       styles = utils.getAppStyles(grunt, options.baseCss, options.appPath);
     }

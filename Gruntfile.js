@@ -74,9 +74,14 @@ module.exports = function (grunt) {
           'app/bootstrap.js'
         ],
 
-        baseCss: [
-          'test/testApp/base.css'
-        ],
+        baseCss: {
+          'bootstrap.min.css':[
+            'test/testApp/bootstrap.css'
+          ],
+          'all.min.css': [
+            'test/testApp/base.css'
+          ]
+        },
         fileVersion: true,
         defaultRoutePath: '/'
       },

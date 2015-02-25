@@ -57,6 +57,33 @@ var JasperUtils = function () {
     return '#_page_' + page.name;
   };
 
+  this.getCssTargets = function(cssConfig){
+    if(!Array.isArray(cssConfig)){
+      var result = [];
+      for(var prop in cssConfig){
+        result.push({
+          filename: prop,
+          files: cssConfig[prop]
+        })
+      }
+      return result;
+    }
+    return [{
+      filename: 'all.min.css',
+      files: cssConfig
+    }];
+  };
+
+  this.getAppStyles = function(grunt, cssConfig, appPath ){
+    var targets = this.getCssTargets(cssConfig);
+    var result = [];
+    for (var i = 0; i < targets.length; i++) {
+      var target = targets[i];
+      result = result.concat(target.files);
+    }
+    return result.concat(grunt.file.expand(appPath + '/**/*.css'));
+  };
+
   this.writeContent = function (grunt, path, content) {
     grunt.file.write(path, '\ufeff' + content, {encoding: 'utf8'});
   }
@@ -91,10 +118,6 @@ var JasperUtils = function () {
       }
     }
     return bootstrapScripts;
-  };
-
-  this.getAppStyles = function (grunt, baseCss, appPath) {
-    return baseCss.concat(grunt.file.expand(appPath + '/**/*.css'));
   };
 
   /**

@@ -72,10 +72,29 @@ Default value: []
 Specifying array of scripts, which bootstrap application (place in the options.singlePage)
 
 #### options.baseCss
-Type: `Array`
+Type: `Array|Object`
 Default value: []
 
-Specifying array of stylesheet, which need to be referenced to the page before components styles. You can specify here any css framework style (Twitter bootstrap) or normalize styles
+Specifying array of stylesheet, which need to be referenced to the page before component's styles. You can specify here any css framework style (Twitter bootstrap) or normalize styles.
+If you want to split your css style into multiple file while packaging setup this property as config object:
+
+```js
+grunt.initConfig({
+  jasper: {
+    options: {
+      baseCss: {
+                'bootstrap.min.css':[
+                  'test/testApp/bootstrap.css'
+                ],
+                'all.min.css': [
+                  'test/testApp/base.css'
+                  //all component's style will be in the last target
+                ]
+              }      
+    }
+  }
+})
+```
 
 #### options.values
 Type: `String`
