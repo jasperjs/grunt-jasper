@@ -49,7 +49,11 @@ var JasperUtils = function () {
     };
 
     var result = minify(source);
+    // remove unnecessary spaces:
     result = result.replace(/(^\s*)/gm, '');
+    // remove html comments:
+    result = result.replace(/<!--([\s,\S]+?)-->/g, '');
+
     return escapeContent(result);
   }
 
