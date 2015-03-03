@@ -44,7 +44,7 @@ var JasperUtils = function () {
     var escapeContent = function (content) {
       var quotRegexp = /\'/g;
       var breaklineRegexp = /(?:\r\n|\r|\n)/g;
-      var first = content.replace(quotRegexp, '\\\'').replace(breaklineRegexp, ' ');
+      var first = content.replace(/\\/g,'\\\\').replace(quotRegexp, '\\\'').replace(breaklineRegexp, ' ');
       return first;
     };
 

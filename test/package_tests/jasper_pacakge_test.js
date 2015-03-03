@@ -105,12 +105,12 @@ exports.jasper = {
     test.ok(configObject.core.scripts.length === 3, 'Core area must contains 3 scripts after package: 1 area script and 2 external scripts');
     test.ok(configObject.core.scripts[0] === 'http://another.path/to/external/script.js', 'Core area must contains external script');
     test.ok(configObject.core.scripts[1] === '//path/to/external/script.js', 'Core area must contains external script');
-    test.ok(configObject.core.scripts[2] === 'scripts/core.min.js?v=61a367ad062b5612806276a669cb2286','Core area must contains area script');
+    test.ok(configObject.core.scripts[2] === 'scripts/core.min.js?v=a0589781f68a8fd874eccf1d1ae18157','Core area must contains area script');
 
     test.strictEqual(configObject.boot.scripts, undefined, 'Scripts of bootstrapped area must be undefined')
 
     ensurePartsExistence(test, configObject.feature.dependencies, ['core']);
-    ensurePartsExistence(test, configObject.core.scripts, ['scripts/core.min.js?v=61a367ad062b5612806276a669cb2286']);
+    ensurePartsExistence(test, configObject.core.scripts, ['scripts/core.min.js?v=a0589781f68a8fd874eccf1d1ae18157']);
     ensurePartsExistence(test, configObject.feature.scripts, ['scripts/feature.min.js?v=539fe595c896279cdb6caeeb7bff75a7']);
 
     test.done();
@@ -120,6 +120,14 @@ exports.jasper = {
     var coreFileContent = grunt.file.read(path.join(appPath, 'dist/scripts/core.min.js'));
 
     test.ok(coreFileContent.indexOf('<!-- $$test comment$$ -->') < 0);
+
+    test.done();
+  },
+
+  testEscapingSlash: function(test){
+    var coreFileContent = grunt.file.read(path.join(appPath, 'dist/scripts/core.min.js'));
+
+    test.ok(coreFileContent.indexOf('\\\\testattrvalue\\\\') > 0, 'core.min.js must escape slash');
 
     test.done();
   }
