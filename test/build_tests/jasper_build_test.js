@@ -61,7 +61,7 @@ exports.jasper = {
     var indexPageContent = grunt.file.read(path.join(appPath, 'index.html'));
 
     scripts.forEach(function (path) {
-      var scriptReferenceText = '<script src="' + processSystemPaths(path) + '"></script>';
+      var scriptReferenceText = '<script src="/' + processSystemPaths(path) + '"></script>';
       test.ok(indexPageContent.indexOf(scriptReferenceText) >= 0, 'Page content must contain ' + processSystemPaths(path) + ' reference');
     });
 
@@ -73,7 +73,7 @@ exports.jasper = {
     var styles = grunt.file.expand(path.join(appPath, '/app/**/*.css'));
     var parts = ['test/testApp/base.css'];
     styles.forEach(function (path) {
-      parts.push('<link rel="stylesheet" href="' + path + '"/>');
+      parts.push('<link rel="stylesheet" href="/' + path + '"/>');
     });
     ensurePartsExistence(test, indexPageContent, parts);
 

@@ -82,7 +82,9 @@ module.exports = function (grunt) {
       /**
        * Include MD5 hash of file content after package
        */
-      fileVersion: false
+      fileVersion: false,
+
+      baseHref: '/'
     });
 
     // pipeline for building jasper application:
@@ -513,7 +515,7 @@ module.exports = function (grunt) {
     var scriptsHtml = '';
     for (var i = 0; i < scripts.length; i++) {
       if (scripts[i]) {
-        scriptsHtml += '\t<script src="' + scripts[i] + '"></script>\r\n';
+        scriptsHtml += '\t<script src="' + options.baseHref +  scripts[i] + '"></script>\r\n';
       }
     }
     var scriptsRegex = /<!-- SCRIPTS -->([\s\S]*)<!-- \/SCRIPTS -->/gim;
@@ -532,14 +534,14 @@ module.exports = function (grunt) {
         }
         styles.push(cssPath);
       }
-
     } else {
       styles = utils.getAppStyles(grunt, options.baseCss, options.appPath);
+
     }
 
     var stylesHtml = '';
     for (var i = 0; i < styles.length; i++) {
-      stylesHtml += '\t<link rel="stylesheet" href="' + styles[i] + '"/>\r\n';
+      stylesHtml += '\t<link rel="stylesheet" href="' + options.baseHref +  styles[i] + '"/>\r\n';
     }
     var stylesRegex = /<!-- STYLES -->([\s\S]*)<!-- \/STYLES -->/gim;
     pageContent = pageContent.replace(stylesRegex, '<!-- STYLES -->\r\n\r\n' + stylesHtml + '\r\n\t<!-- /STYLES -->');
