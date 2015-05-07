@@ -138,11 +138,11 @@ exports.jasper = {
     var areaInitContent = grunt.file.read(areaInitPath);
 
     var contentParts = [
-      'jsp.component({"ctrl":"spa.core.components.SiteFooter","name":"siteFooter","templateUrl":"test/testApp/app/core/components/site-footer/site-footer.html"})',
+      'jsp.component({"ctrl":spa.core.components.SiteFooter,"name":"siteFooter","templateUrl":"test/testApp/app/core/components/site-footer/site-footer.html"})',
       'jsp.template(\'#_page_homePage\',\'<home-page></home-page>\')',
-      'jsp.component({"ctrl":"spa.core.components.SiteHeader","attributes":[{"name":"my-attr"},{"name":"on-click","type":"exp"}],"name":"siteHeader","templateUrl":"test/testApp/app/core/components/site-header/site-header.html"})',
-      'jsp.component({"route":"/","ctrl":"spa.core.pages.HomePage"',
-      'jsp.decorator({"ctrl":"spa.core.decorators.FocusOnDefault","name":"focusOnDefault"})',
+      'jsp.component({"ctrl":spa.core.components.SiteHeader,"attributes":[{"name":"my-attr"},{"name":"on-click","type":"exp"}],"name":"siteHeader","templateUrl":"test/testApp/app/core/components/site-header/site-header.html"})',
+      'jsp.component({"route":"/","ctrl":spa.core.pages.HomePage',
+      'jsp.decorator({"ctrl":spa.core.decorators.FocusOnDefault,"name":"focusOnDefault"})',
       'jsp.template(\'template\',\'<p>custom template</p>\');'
     ];
 
@@ -155,9 +155,9 @@ exports.jasper = {
     areaInitContent = grunt.file.read(areaInitPath);
 
     contentParts = [
-      'jsp.component({"ctrl":"spa.feature.components.FeatureTag","name":"featureTag","templateUrl":"test/testApp/app/feature/components/feature-tag/feature-tag.html"})',
-      'jsp.decorator({"ctrl":"spa.feature.components.RedColor","name":"redColor"})',
-      'jsp.filter({"name":"currency","ctrl":"spa.feature.filters.Currency"})'
+      'jsp.component({"ctrl":spa.feature.components.FeatureTag,"name":"featureTag","templateUrl":"test/testApp/app/feature/components/feature-tag/feature-tag.html"})',
+      'jsp.decorator({"ctrl":spa.feature.components.RedColor,"name":"redColor"})',
+      'jsp.filter({"name":"currency","ctrl":spa.feature.filters.Currency})'
     ];
 
     ensurePartsExistence(test, areaInitContent, contentParts);

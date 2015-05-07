@@ -40,13 +40,14 @@ var JasperUtils = function () {
     });
   };
 
+  this.escapeContent = function(content){
+    var quotRegexp = /\'/g;
+    var breaklineRegexp = /(?:\r\n|\r|\n)/g;
+    var first = content.replace(/\\/g,'\\\\').replace(quotRegexp, '\\\'').replace(breaklineRegexp, ' ');
+    return first;
+  };
+
   this.minifyHtml = function (source) {
-    var escapeContent = function (content) {
-      var quotRegexp = /\'/g;
-      var breaklineRegexp = /(?:\r\n|\r|\n)/g;
-      var first = content.replace(/\\/g,'\\\\').replace(quotRegexp, '\\\'').replace(breaklineRegexp, ' ');
-      return first;
-    };
 
     var result = minify(source);
     // remove unnecessary spaces:
@@ -54,7 +55,7 @@ var JasperUtils = function () {
     // remove html comments:
     result = result.replace(/<!--([\s,\S]+?)-->/g, '');
 
-    return escapeContent(result);
+    return this.escapeContent(result);
   }
 
   this.getPageTemplateUrl = function (page) {

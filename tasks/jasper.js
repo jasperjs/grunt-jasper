@@ -249,7 +249,7 @@ module.exports = function (grunt) {
    */
   grunt.registerTask('jasperAreaInit', 'Building areas initialization files (_init.js)', function () {
     areas.forEach(function (area) {
-      var areaScript = 'jsp.ready(function(){ jsp.areas.initArea("' + area.name + '").then(function() { \n\n';
+      var areaScript = 'jsp.ready(function(){ jsp.areas.initArea("' + area.name + '", function() { \n\n';
       area.__defs.forEach(function (def) {
         areaScript += getRegistrationScript(def, area.name);
       });
