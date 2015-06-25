@@ -171,7 +171,7 @@ module.exports = function (grunt) {
       var areaDefinitions = [];
       var configurations = grunt.file.expand(area.__path + '/**/_definition.json');
 
-      var registerDefinition = function(config, def){
+      var registerDefinition = function (config, def) {
         if (!def.name) {
           var tagName = utils.getParentFolderName(config);
           def.name = utils.camelCaseTagName(tagName);
@@ -180,12 +180,20 @@ module.exports = function (grunt) {
           def.type = 'component';
         }
 
-        if (def.attributes) {
+        if (def.properties || def.events) {
+          if (def.properties) {
+            def.properties = utils.splitStringBySpace(def.properties);
+          }
+          if (def.events) {
+            def.events = utils.splitStringBySpace(def.events);
+          }
+        }
+        else if (def.attributes) {
           def.attributes = utils.getJasperAttributes(def.attributes);
         }
 
         if (def.type.toUpperCase() === 'PAGE') {
-          if(!def.area)
+          if (!def.area)
             def.area = area.name;
           pages.push(def);
         }
@@ -197,8 +205,8 @@ module.exports = function (grunt) {
           delete def.templateFile;
         }
 
-        if(def.type.toUpperCase() === 'TEMPLATE'){
-          if(!def.templateUrl){
+        if (def.type.toUpperCase() === 'TEMPLATE') {
+          if (!def.templateUrl) {
             grunt.log.error('TemplateFile not defined in ' + def.__path);
             return;
           }
@@ -230,11 +238,11 @@ module.exports = function (grunt) {
 
       configurations.forEach(function (config) {
         var def = grunt.file.readJSON(config);
-        if(Array.isArray(def)){
-          def.forEach(function(d){
+        if (Array.isArray(def)) {
+          def.forEach(function (d) {
             registerDefinition(config, d);
           });
-        }else {
+        } else {
           registerDefinition(config, def);
         }
       });
@@ -344,10 +352,10 @@ module.exports = function (grunt) {
       var target = cssTargets[i];
       var fileConfig = {
         src: target.files || [],
-        dest: stylesMinDest+ target.filename,
+        dest: stylesMinDest + target.filename,
         ext: '.min.css'
       };
-      if(i === cssTargets.length - 1){
+      if (i === cssTargets.length - 1) {
         fileConfig.src = fileConfig.src.concat(grunt.file.expand(options.appPath + '/**/*.css'));
       }
       files.push(fileConfig);
@@ -360,7 +368,7 @@ module.exports = function (grunt) {
     var minifyPipeline = ['cssmin'];
     grunt.config('cssmin', cssMinConf);
 
-    if(runConcatMinify) {
+    if (runConcatMinify) {
       //run concat minify, only if any area to minify
       grunt.config('uglify', uglifyConf);
       grunt.config('concat', concatConf);
@@ -395,7 +403,7 @@ module.exports = function (grunt) {
           var areaScrtips = utils.excludeAbsScripts(area.__scripts);
           // during package build each area represents by one .js file
           var areaMinScriptReferencePath = 'scripts/' + area.name + '.min.js';
-          if(options.fileVersion) {
+          if (options.fileVersion) {
             // append version param for area script filename
             areaMinScriptReferencePath = utils.appendFileVersion(options.packageOutput + '/' + areaMinScriptReferencePath, areaMinScriptReferencePath);
           }
@@ -443,7 +451,7 @@ module.exports = function (grunt) {
    * Building client-side values configuration script (_values.js)
    */
   grunt.registerTask('jasperValuesConfig', 'Building client-side values configuration script (_values.js)', function () {
-    if(!options.values)
+    if (!options.values)
       return;
 
     if (!grunt.file.exists(options.values)) {
@@ -467,7 +475,7 @@ module.exports = function (grunt) {
    *  Creates _base.js and _base.min.js files
    */
   grunt.registerTask('jasperPackageBase', 'Modify single page', function () {
-    if(!options.package)
+    if (!options.package)
       return;
     // concat base
     var concatConf = grunt.config('concat') || {};
@@ -515,7 +523,7 @@ module.exports = function (grunt) {
     var scriptsHtml = '';
     for (var i = 0; i < scripts.length; i++) {
       if (scripts[i]) {
-        scriptsHtml += '\t<script src="' + options.baseHref +  scripts[i] + '"></script>\r\n';
+        scriptsHtml += '\t<script src="' + options.baseHref + scripts[i] + '"></script>\r\n';
       }
     }
     var scriptsRegex = /<!-- SCRIPTS -->([\s\S]*)<!-- \/SCRIPTS -->/gim;
@@ -541,7 +549,7 @@ module.exports = function (grunt) {
 
     var stylesHtml = '';
     for (var i = 0; i < styles.length; i++) {
-      stylesHtml += '\t<link rel="stylesheet" href="' + options.baseHref +  styles[i] + '"/>\r\n';
+      stylesHtml += '\t<link rel="stylesheet" href="' + options.baseHref + styles[i] + '"/>\r\n';
     }
     var stylesRegex = /<!-- STYLES -->([\s\S]*)<!-- \/STYLES -->/gim;
     pageContent = pageContent.replace(stylesRegex, '<!-- STYLES -->\r\n\r\n' + stylesHtml + '\r\n\t<!-- /STYLES -->');

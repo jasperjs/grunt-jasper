@@ -2,5 +2,6 @@
     "templateFile": "site-header.html",
     "type": "component",
     "ctrl": "spa.core.components.SiteHeader",
-    "attributes": "my-attr on-click:exp"
+    "properties": "myAttr",
+    "events": "click"
 }

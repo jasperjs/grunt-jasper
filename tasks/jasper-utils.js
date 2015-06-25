@@ -40,10 +40,10 @@ var JasperUtils = function () {
     });
   };
 
-  this.escapeContent = function(content){
+  this.escapeContent = function (content) {
     var quotRegexp = /\'/g;
     var breaklineRegexp = /(?:\r\n|\r|\n)/g;
-    var first = content.replace(/\\/g,'\\\\').replace(quotRegexp, '\\\'').replace(breaklineRegexp, ' ');
+    var first = content.replace(/\\/g, '\\\\').replace(quotRegexp, '\\\'').replace(breaklineRegexp, ' ');
     return first;
   };
 
@@ -62,10 +62,10 @@ var JasperUtils = function () {
     return '#_page_' + page.name;
   };
 
-  this.getCssTargets = function(cssConfig){
-    if(!Array.isArray(cssConfig)){
+  this.getCssTargets = function (cssConfig) {
+    if (!Array.isArray(cssConfig)) {
       var result = [];
-      for(var prop in cssConfig){
+      for (var prop in cssConfig) {
         result.push({
           filename: prop,
           files: cssConfig[prop]
@@ -79,7 +79,7 @@ var JasperUtils = function () {
     }];
   };
 
-  this.getAppStyles = function(grunt, cssConfig, appPath ){
+  this.getAppStyles = function (grunt, cssConfig, appPath) {
     var targets = this.getCssTargets(cssConfig);
     var result = [];
     for (var i = 0; i < targets.length; i++) {
@@ -152,6 +152,18 @@ var JasperUtils = function () {
     return attrs;
   };
 
+  this.splitStringBySpace = function (props) {
+    if (typeof (props) === 'string') {
+      return props.split(' ').map(function (item) {
+        var i = item.trim();
+        return i ? i : null;
+      }).filter(function (i) {
+        return i;
+      });
+    }
+    return props;
+  };
+
   this.isAbsUrl = function (url) {
     var r = new RegExp('^(?:[a-z]+:)?//', 'i');
     return r.test(url);
@@ -161,11 +173,11 @@ var JasperUtils = function () {
    * Excludes from @scripts absolutes script paths and returns array of excluded paths
    * @param scripts   Array of scripts
    */
-  this.excludeAbsScripts = function(scripts){
+  this.excludeAbsScripts = function (scripts) {
     var result = [];
-    for(var i = scripts.length - 1; i >= 0; i--){
-      if(this.isAbsUrl(scripts[i])) {
-        result.push(scripts.splice( i, 1)[0]);
+    for (var i = scripts.length - 1; i >= 0; i--) {
+      if (this.isAbsUrl(scripts[i])) {
+        result.push(scripts.splice(i, 1)[0]);
       }
     }
     return result;
