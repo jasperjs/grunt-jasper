@@ -184,12 +184,26 @@ module.exports = function (grunt) {
           if (def.properties) {
             def.properties = utils.splitStringBySpace(def.properties);
           }
+          else {
+            delete def.properties;
+          }
+
           if (def.events) {
             def.events = utils.splitStringBySpace(def.events);
+          } else {
+            delete def.events;
           }
+
         }
-        else if (def.attributes) {
-          def.attributes = utils.getJasperAttributes(def.attributes);
+        else {
+          if (def.attributes) {
+            def.attributes = utils.getJasperAttributes(def.attributes);
+          } else {
+            delete def.attributes;
+          }
+
+          delete def.properties;
+          delete def.events;
         }
 
         if (def.type.toUpperCase() === 'PAGE') {

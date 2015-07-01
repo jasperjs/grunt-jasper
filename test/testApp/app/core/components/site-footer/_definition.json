@@ -2,7 +2,9 @@
   {
     "templateFile": "site-footer.html",
     "type": "component",
-    "ctrl": "spa.core.components.SiteFooter"
+    "ctrl": "spa.core.components.SiteFooter",
+    "properties": "",
+    "events": ""
   },
   {
     "templateFile": "site-footer2.html",
