@@ -105,12 +105,12 @@ exports.jasper = {
     test.ok(configObject.core.scripts.length === 3, 'Core area must contains 3 scripts after package: 1 area script and 2 external scripts');
     test.ok(configObject.core.scripts[0] === 'http://another.path/to/external/script.js', 'Core area must contains external script');
     test.ok(configObject.core.scripts[1] === '//path/to/external/script.js', 'Core area must contains external script');
-    test.ok(configObject.core.scripts[2] === 'scripts/core.min.js?v=d2b417555b0ed3464a48b17f5a977bce','Core area must contains area script');
+    test.ok(configObject.core.scripts[2] === 'scripts/core.min.js?v=0be23d10a3ef9097cc27cdcba70427dd','Core area must contains area script');
 
     test.strictEqual(configObject.boot.scripts, undefined, 'Scripts of bootstrapped area must be undefined')
 
     ensurePartsExistence(test, configObject.feature.dependencies, ['core']);
-    ensurePartsExistence(test, configObject.core.scripts, ['scripts/core.min.js?v=d2b417555b0ed3464a48b17f5a977bce']);
+    ensurePartsExistence(test, configObject.core.scripts, ['scripts/core.min.js?v=0be23d10a3ef9097cc27cdcba70427dd']);
     ensurePartsExistence(test, configObject.feature.scripts, ['scripts/feature.min.js?v=ca5b43d674186430395711bdd4d6ae04']);
 
     test.done();

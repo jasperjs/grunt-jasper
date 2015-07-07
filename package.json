@@ -1,6 +1,6 @@
 {
   "name": "grunt-jasper",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Grunt task to build and package jasper application",
   "homepage": "https://github.com/jasperjs/grunt-jasper",
   "repository": "https://github.com/jasperjs/grunt-jasper",
@@ -18,9 +18,6 @@
     "node": ">= 0.8.0"
   },
   "license": "MIT",
-  "dependencies": {
-    "html-minifier": "^0.6.9"
-  },
   "devDependencies": {
     "grunt-contrib-clean": "~0.5.0",
     "grunt-contrib-jshint": "~0.8.0",

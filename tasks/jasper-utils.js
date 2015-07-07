@@ -1,6 +1,5 @@
 ﻿'use strict';
 var crypto = require('crypto');
-var minify = require('html-minifier').minify;
 var fs = require('fs');
 var path = require('path');
 
@@ -49,14 +48,14 @@ var JasperUtils = function () {
 
   this.minifyHtml = function (source) {
 
-    var result = minify(source);
     // remove unnecessary spaces:
-    result = result.replace(/(^\s*)/gm, '');
+    var result = source.replace(/(^\s*)/gm, '');
+
     // remove html comments:
-    result = result.replace(/<!--([\s,\S]+?)-->/g, '');
+    result = result.replace(/<!--([\s,\S]+?)-->/g, '').trim();
 
     return this.escapeContent(result);
-  }
+  };
 
   this.getPageTemplateUrl = function (page) {
     return '#_page_' + page.name;
