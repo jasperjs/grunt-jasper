@@ -107,23 +107,6 @@ var JasperUtils = function () {
     return jsScripts;
   };
 
-  this.getBootstrapScripts = function (bootstrapScripts, areasConfigPath, routesConfigPath, valuesConfigPath) {
-
-    var wildcards = {
-      '%areas_config%': areasConfigPath,
-      '%routes_config%': routesConfigPath,
-      '%values_config%': valuesConfigPath
-    }
-
-    for (var i = 0; i < bootstrapScripts.length; i++) {
-      var scriptPath = bootstrapScripts[i];
-      if (wildcards[scriptPath]) {
-        bootstrapScripts[i] = wildcards[scriptPath]
-      }
-    }
-    return bootstrapScripts;
-  };
-
   /**
    * Split attributes definition string by object for jasper client library usage
    * @param attrs                     string that represents attributes

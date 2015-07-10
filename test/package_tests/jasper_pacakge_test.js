@@ -25,22 +25,12 @@ var testUtils = require('../utils');
 
 var appPath = 'test/testApp';
 
+var coreAreaFilename = 'core.e3ce8a262413804c0391ef99b5aa3c1e.min.js',
+  baseFilename = '_base.6eba8eda7d5da126ad1d5b2a93fd4f75.min.js',
+  featureAreaFilename ='feature.fed60babeb320aa4ba3dac5788379867.min.js';
+
 var getConfig = function () {
   return grunt.config('jasper').options;
-};
-
-var processSystemPaths = function (path) {
-  var config = getConfig();
-  var wildcards = {
-     '%areas_config%': config.appPath + '/_areas.release.js',
-     '%values_config%': config.appPath + '/_values.release.js',
-     '%routes_config%': config.appPath + '/_routes.release.js'
-  };
-  if(wildcards[path])
-  {
-    return wildcards[path];
-  }
-  return path;
 };
 
 var ensurePartsExistence = function (test, content, parts) {
@@ -68,12 +58,12 @@ exports.jasper = {
       'dist/index.html',
       'dist/styles/all.min.css',
       'dist/styles/bootstrap.min.css',
-      'dist/scripts/_base.min.js',
-      'dist/scripts/core.min.js',
-      'dist/scripts/feature.min.js',
+      'dist/scripts/' + baseFilename,
+      'dist/scripts/' + coreAreaFilename,
+      'dist/scripts/' + featureAreaFilename,
       'app/_areas.release.js',
       'app/_routes.release.js'
-    ]
+    ];
     ensureFilesExistence(test, packageFiles);
     test.done();
   },
@@ -105,27 +95,25 @@ exports.jasper = {
     test.ok(configObject.core.scripts.length === 3, 'Core area must contains 3 scripts after package: 1 area script and 2 external scripts');
     test.ok(configObject.core.scripts[0] === 'http://another.path/to/external/script.js', 'Core area must contains external script');
     test.ok(configObject.core.scripts[1] === '//path/to/external/script.js', 'Core area must contains external script');
-    test.ok(configObject.core.scripts[2] === 'scripts/core.min.js?v=0be23d10a3ef9097cc27cdcba70427dd','Core area must contains area script');
+    test.ok(configObject.core.scripts[2] === 'scripts/' + coreAreaFilename,'Core area must contains area script');
 
     test.strictEqual(configObject.boot.scripts, undefined, 'Scripts of bootstrapped area must be undefined')
 
     ensurePartsExistence(test, configObject.feature.dependencies, ['core']);
-    ensurePartsExistence(test, configObject.core.scripts, ['scripts/core.min.js?v=0be23d10a3ef9097cc27cdcba70427dd']);
-    ensurePartsExistence(test, configObject.feature.scripts, ['scripts/feature.min.js?v=ca5b43d674186430395711bdd4d6ae04']);
+    ensurePartsExistence(test, configObject.core.scripts, ['scripts/' + coreAreaFilename]);
+    ensurePartsExistence(test, configObject.feature.scripts, ['scripts/' + featureAreaFilename]);
 
     test.done();
   },
 
   testHtmlCommentRemoving: function(test){
-    var coreFileContent = grunt.file.read(path.join(appPath, 'dist/scripts/core.min.js'));
-
+    var coreFileContent = grunt.file.read(path.join(appPath, 'dist/scripts/' + coreAreaFilename));
     test.ok(coreFileContent.indexOf('<!-- $$test comment$$ -->') < 0);
-
     test.done();
   },
 
   testEscapingSlash: function(test){
-    var coreFileContent = grunt.file.read(path.join(appPath, 'dist/scripts/core.min.js'));
+    var coreFileContent = grunt.file.read(path.join(appPath, 'dist/scripts/' + coreAreaFilename));
 
     test.ok(coreFileContent.indexOf('\\\\testattrvalue\\\\') > 0, 'core.min.js must escape slash');
 

@@ -65,11 +65,18 @@ Default value: 'dist'
 
 Specifying destination of application package
 
-#### options.bootstrapScripts
+#### options.baseScripts
 Type: `Array`
 Default value: []
 
-Specifying array of scripts, which bootstrap application (place in the options.singlePage)
+Specifying array of scripts, base dependencies of application like: angularjs, jasperjs, jquery, lodash, etc... (place in the options.singlePage)
+
+#### options.startup
+Type: `String`
+Default value: ''
+
+Specifying startup script path, which bootstrap the application.
+
 
 #### options.baseCss
 Type: `Array|Object`

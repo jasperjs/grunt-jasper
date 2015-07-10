@@ -57,7 +57,7 @@ exports.jasper = {
   },
 
   testIndexPageScripts: function (test) {
-    var scripts = this.config.bootstrapScripts;
+    var scripts = this.config.baseScripts;
     var indexPageContent = grunt.file.read(path.join(appPath, 'index.html'));
 
     scripts.forEach(function (path) {

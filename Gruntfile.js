@@ -49,19 +49,15 @@ module.exports = function (grunt) {
         singlePage: 'test/testApp/index.html',
         appPath: 'test/testApp/app',
 
-        bootstrapScripts: [
+        baseScripts: [
           'vendor/angularjs/angular.js',
           'vendor/angularjs/angular-route.js',
           'vendor/scriptjs/script.js',
 
-          'vendor/jasper/jasper.js',
-
-          '%areas_config%',
-          '%routes_config%',
-          '%values_config%',
-
-          'app/bootstrap.js'
+          'vendor/jasper/jasper.js'
         ],
+
+        startup: 'test/testApp/app/bootstrap.js',
 
         baseCss: {
           'bootstrap.min.css':[

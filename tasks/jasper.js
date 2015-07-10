@@ -52,14 +52,21 @@ var getRegistrationScript = function (def) {
 };
 
 var options, // jasper task options
-  processedBootstrapScripts = [], // scripts defined in the task options
+  startupScripts = [],// scripts must included in _startup.js
   baseScripts = [], //scripts which must included in _base.js
   routesConfigPath, // path to the routes configuration
   areasConfigPath, // path to areas config file
   valuesConfigPath, // path to values config
   pages = [], // found app pages
   areas = [], // set of found areas
-  target; // current target of the task
+  target,  // current target of the task
+  packagedAreasPaths = {}, // paths to packaged areas scripts
+  packageScriptsReferencePath = 'scripts/',
+// _base.js
+  baseScript = {},// { path: string, minpath: string, filename: string, minfilename: string}
+// _startup.js
+  startupScript = {}; // { path: string, minpath: string, filename: string, minfilename: string}
+
 
 module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-concat');
@@ -76,7 +83,9 @@ module.exports = function (grunt) {
       packageOutput: 'dist',
 
       defaultRoutePath: '/',
-      bootstrapScripts: [],
+      baseScripts: [],
+
+      startup: '',
 
       baseCss: [],
       /**
@@ -86,6 +95,8 @@ module.exports = function (grunt) {
 
       baseHref: '/'
     });
+
+    baseScripts = options.baseScripts;
 
     // pipeline for building jasper application:
     var pipeline = [
@@ -106,7 +117,9 @@ module.exports = function (grunt) {
      * Now we need to concatenate and minify all areas scripts, templates
      * Executes only for package process (options.package == true)
      */
-      'jasperPackageAreas',
+      'jasperPackageStyles',
+      'jasperPackageConcatAreas',
+      'jasperPackageMinifyAreas',
     /**
      * Now create a client-side areas configuration script (_areas.js) that tell client which areas exists in application,
      * dependencies between areas, and their script files
@@ -124,12 +137,20 @@ module.exports = function (grunt) {
     /**
      * After areas, routes and values config was built we need to create bootstrap script (_base.js) that will loaded at
      * first time and bootstrap the application.
-     * Bootstrap script includes:
-     * - Scripts that marks as bootstrap in jasper.json file: angular.js, jasper.js, any custom user's scripts.
+     * Base scripts are:
+     * - Scripts that marks as base in jasper.json file: angular.js, jasper.js, any custom user's scripts.
      * - Areas, routes and values configuration scripts that was built in previous steps
      * - Areas scripts, which marked as 'bootstrap' (in _area.json)
      */
-      'jasperPackageBase',
+      'jasperPackageConcatBase',
+      'jasperPackageMinifyBase',
+    /**
+     * _startup.js contains scripts with client-side configuration (areas, routes, values)
+     * and user app bootstrap scripts
+     */
+      'jasperConfigureStartup',
+      'jasperPackageConcatStartup',
+      'jasperPackageMinifyStartup',
     /**
      * Modify single page, include reference to bootstrap scripts and styles.
      */
@@ -290,19 +311,48 @@ module.exports = function (grunt) {
     });
   });
 
+  grunt.registerTask('jasperPackageStyles', function(){
+    if (!options.package)
+      return; // execute on package process only
+    var cssMinConf = grunt.config('cssmin') || {};
+    // build CSS styles:
+    var stylesMinDest = options.packageOutput + '/styles/';
+    //determine application css targets
+    var cssTargets = utils.getCssTargets(options.baseCss);
+    var files = [];
+    //build cssmin task configuration
+    for (var i = 0; i < cssTargets.length; i++) {
+      var target = cssTargets[i];
+      var fileConfig = {
+        src: target.files || [],
+        dest: stylesMinDest + target.filename,
+        ext: '.min.css'
+      };
+      if (i === cssTargets.length - 1) {
+        fileConfig.src = fileConfig.src.concat(grunt.file.expand(options.appPath + '/**/*.css'));
+      }
+      files.push(fileConfig);
+    }
+
+    cssMinConf['release'] = {
+      files: files
+    };
+    grunt.config('cssmin', cssMinConf);
+
+    grunt.task.run('cssmin');
+
+  });
+
   /**
-   * Task concatenate and uglify areas scripts
+   * Task concatenate areas scripts
    */
-  grunt.registerTask('jasperPackageAreas', 'Concatenate and uglify areas scripts', function () {
+  grunt.registerTask('jasperPackageConcatAreas', 'Concatenate all areas scripts', function () {
 
     if (!options.package)
       return; // execute on package process only
 
     var runConcatMinify = false;
     var concatConf = grunt.config('concat') || {};
-    var uglifyConf = grunt.config('uglify') || {};
-    var cssMinConf = grunt.config('cssmin') || {};
-
     var appendedAreas = {};
 
     var findAreaByName = function (areaName) {
@@ -336,60 +386,64 @@ module.exports = function (grunt) {
       appendedAreas[area.name] = true;
     };
 
-    // Build bootstrap scripts first
-    var uglifyFiles = {};
+    // Build concat scripts first
+    var concatAreas = [];
     areas.forEach(function (area) {
       if (!area.bootstrap) {
         var dest = options.packageOutput + '/scripts/' + area.name + '.js';
-        var destMin = options.packageOutput + '/scripts/' + area.name + '.min.js';
         concatConf['jasper_' + area.name] = {
           src: area.__scripts,
           dest: dest
         };
-        uglifyFiles[destMin] = dest;
+        concatAreas.push({name: area.name, path: dest});
         runConcatMinify = true;
       } else {
         // append bootstrap area scripts to the _base.js
         appendAreasScriptsToBootstrap(area, baseScripts, 0);
       }
     });
-
-    uglifyConf.dest = {
-      files: uglifyFiles
-    };
-    var stylesMinDest = options.packageOutput + '/styles/';
-    //determine application css targets
-    var cssTargets = utils.getCssTargets(options.baseCss);
-    var files = [];
-    //build cssmin task configuration
-    for (var i = 0; i < cssTargets.length; i++) {
-      var target = cssTargets[i];
-      var fileConfig = {
-        src: target.files || [],
-        dest: stylesMinDest + target.filename,
-        ext: '.min.css'
-      };
-      if (i === cssTargets.length - 1) {
-        fileConfig.src = fileConfig.src.concat(grunt.file.expand(options.appPath + '/**/*.css'));
-      }
-      files.push(fileConfig);
-    }
-
-    cssMinConf['release'] = {
-      files: files
-    };
-
-    var minifyPipeline = ['cssmin'];
-    grunt.config('cssmin', cssMinConf);
-
     if (runConcatMinify) {
-      //run concat minify, only if any area to minify
-      grunt.config('uglify', uglifyConf);
       grunt.config('concat', concatConf);
-      minifyPipeline = minifyPipeline.concat(['concat', 'uglify']);
+      grunt.task.run('concat');
     }
 
-    grunt.task.run(minifyPipeline);
+  });
+
+  /**
+   * Task concatenate and uglify areas scripts
+   */
+  grunt.registerTask('jasperPackageMinifyAreas', 'Minify all areas scripts', function () {
+
+    if (!options.package)
+      return; // execute on package process only
+    var uglifyConf = grunt.config('uglify') || {};
+    var uglifyFiles = {}, runUglify = false;
+
+    areas.forEach(function (area) {
+      if (!area.bootstrap) {
+        var areaPath = options.packageOutput + '/scripts/' + area.name + '.js';
+        var destPath = options.packageOutput + '/scripts/', filename;
+        if (options.fileVersion) {
+          var version = utils.computeMd5(areaPath);
+          filename = area.name + '.' + version + '.min.js'
+        } else {
+          filename = area.name + '.min.js'
+        }
+
+        uglifyFiles[destPath + filename] = areaPath;
+
+        packagedAreasPaths[area.name] = filename;
+        runUglify=  true;
+      }
+    });
+    if(runUglify){
+      uglifyConf.dest = {
+        files: uglifyFiles
+      };
+      grunt.config('uglify', uglifyConf);
+      grunt.task.run('uglify');
+    }
+
   });
 
   /**
@@ -408,20 +462,14 @@ module.exports = function (grunt) {
       config.dependencies = area.dependencies;
       if (options.package) {
         if (area.bootstrap && area.scripts && area.scripts.length) {
-          grunt.log.error('Configuration error: bootstrap area \"' + area.name + '\" must not contains "scripts". Use "bootstrapScripts" instead')
+          grunt.log.error('Configuration error: bootstrap area \"' + area.name + '\" must not contains "scripts". Use "baseScripts" instead')
           return;
         }
         // if it's a package process and area mark as 'bootstrap' do nothing. This area scripts will included in _base.js
         if (!area.bootstrap) {
           // get all area external scripts
           var areaScrtips = utils.excludeAbsScripts(area.__scripts);
-          // during package build each area represents by one .js file
-          var areaMinScriptReferencePath = 'scripts/' + area.name + '.min.js';
-          if (options.fileVersion) {
-            // append version param for area script filename
-            areaMinScriptReferencePath = utils.appendFileVersion(options.packageOutput + '/' + areaMinScriptReferencePath, areaMinScriptReferencePath);
-          }
-          areaScrtips.push(areaMinScriptReferencePath);
+          areaScrtips.push(packageScriptsReferencePath + packagedAreasPaths[area.name]);
           config.scripts = areaScrtips;
         }
       } else {
@@ -456,8 +504,6 @@ module.exports = function (grunt) {
 
     utils.writeContent(grunt, routesConfigPath, routesConfigScript);
 
-    processedBootstrapScripts = utils.getBootstrapScripts(options.bootstrapScripts, areasConfigPath, routesConfigPath, valuesConfigPath);
-
     grunt.log.writeln('Routes configuration was built at: "' + routesConfigPath + '"');
   });
 
@@ -486,34 +532,96 @@ module.exports = function (grunt) {
 
 
   /**
-   *  Creates _base.js and _base.min.js files
+   *  Creates _base.js files
    */
-  grunt.registerTask('jasperPackageBase', 'Modify single page', function () {
+  grunt.registerTask('jasperPackageConcatBase', 'Concatinate all base scripts', function () {
     if (!options.package)
       return;
     // concat base
     var concatConf = grunt.config('concat') || {};
-    var uglifyConf = grunt.config('uglify') || {};
-    var baseDest = options.packageOutput + '/scripts/_base.js';
-
-    baseScripts = processedBootstrapScripts.concat(baseScripts);
+    //var uglifyConf = grunt.config('uglify') || {};
+    baseScript.filename = '_base.js';
+    baseScript.path = options.packageOutput + '/scripts/' + baseScript.filename;
 
     concatConf.jasperbase = {
       src: baseScripts,
-      dest: baseDest
-    };
-
-    var files = {};
-    files[options.packageOutput + '/scripts/_base.min.js'] = baseDest;
-    uglifyConf.jasperbase = {
-      files: files
+      dest: baseScript.path
     };
 
     grunt.config('concat', concatConf);
+    grunt.task.run(['concat:jasperbase']);
+
+  });
+
+
+  /**
+   *  Creates _base.min.js files
+   */
+  grunt.registerTask('jasperPackageMinifyBase', 'Minify _base.js', function () {
+    if (!options.package)
+      return;
+    // concat base
+    var uglifyConf = grunt.config('uglify') || {};
+    var baseMinVersion = utils.computeMd5(baseScript.path);
+    baseScript.minfilename = '_base.' + (options.fileVersion ? baseMinVersion : '') + '.min.js';
+    baseScript.minpath = options.packageOutput + '/scripts/' + baseScript.minfilename;
+    uglifyConf.jasperbase = {files: {}};
+    uglifyConf.jasperbase.files[baseScript.minpath] = baseScript.path;
     grunt.config('uglify', uglifyConf);
+    grunt.task.run(['uglify:jasperbase']);
+  });
 
-    grunt.task.run(['concat:jasperbase', 'uglify:jasperbase']);
+  /**
+   * Configure startup scripts
+   */
+  grunt.registerTask('jasperConfigureStartup', 'Concatinate all startup scripts', function () {
+    startupScripts = [areasConfigPath, routesConfigPath];
+    if (valuesConfigPath) {
+      startupScripts.push(valuesConfigPath);
+    }
+    if (options.startup) {
+      startupScripts.push(options.startup);
+    }
+  });
 
+  /**
+   *  Creates _startup.js files
+   */
+  grunt.registerTask('jasperPackageConcatStartup', 'Concatinate all startup scripts', function () {
+    if (!options.package)
+      return;
+    // concat base
+    var concatConf = grunt.config('concat') || {};
+    //var uglifyConf = grunt.config('uglify') || {};
+    startupScript.filename = '_startup.js';
+    startupScript.path = options.packageOutput + '/scripts/' + startupScript.filename;
+
+    concatConf.jasperstartup = {
+      src: startupScripts,
+      dest: startupScript.path
+    };
+
+    grunt.config('concat', concatConf);
+    grunt.task.run(['concat:jasperstartup']);
+
+  });
+
+
+  /**
+   *  Creates _startup.min.js files
+   */
+  grunt.registerTask('jasperPackageMinifyStartup', 'Minify _startup.js', function () {
+    if (!options.package)
+      return;
+    // concat startup
+    var uglifyConf = grunt.config('uglify') || {};
+    var startupMinVersion = utils.computeMd5(startupScript.path);
+    startupScript.minfilename = '_startup.' + (options.fileVersion ? startupMinVersion : '') + '.min.js';
+    startupScript.minpath = options.packageOutput + '/scripts/' + startupScript.minfilename ;
+    uglifyConf.jasperstartup = {files: {}};
+    uglifyConf.jasperstartup.files[startupScript.minpath] = startupScript.path;
+    grunt.config('uglify', uglifyConf);
+    grunt.task.run(['uglify:jasperstartup']);
   });
 
   /**
@@ -525,13 +633,10 @@ module.exports = function (grunt) {
     /* patch scripts */
     var scripts = [];
     if (options.package) {
-      var baseReferencePath = 'scripts/_base.min.js';
-      if (options.fileVersion) {
-        baseReferencePath = utils.appendFileVersion(options.packageOutput + '/' + baseReferencePath, baseReferencePath);
-      }
-      scripts.push(baseReferencePath);
+      scripts.push( packageScriptsReferencePath + baseScript.minfilename);
+      scripts.push( packageScriptsReferencePath + startupScript.minfilename);
     } else {
-      scripts = processedBootstrapScripts;
+      scripts = baseScripts.concat(startupScripts);
     }
 
     var scriptsHtml = '';
