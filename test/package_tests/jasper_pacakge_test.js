@@ -25,9 +25,10 @@ var testUtils = require('../utils');
 
 var appPath = 'test/testApp';
 
-var coreAreaFilename = 'core.e3ce8a262413804c0391ef99b5aa3c1e.min.js',
-  baseFilename = '_base.6eba8eda7d5da126ad1d5b2a93fd4f75.min.js',
-  featureAreaFilename ='feature.fed60babeb320aa4ba3dac5788379867.min.js';
+var coreAreaFilename = 'core.6d99417548e9ee8ad629849335ab6d54.min.js',
+  startupFilename = '_startup.efe1b8c56e8f729825118ed6fdb2f519.min.js',
+  baseFilename = '_base.b66528ef443c1441a9fd1d61f08ddbd5.min.js',
+  featureAreaFilename ='feature.bc3c06ff49df45baa958a09340773fe0.min.js';
 
 var getConfig = function () {
   return grunt.config('jasper').options;
@@ -60,6 +61,7 @@ exports.jasper = {
       'dist/styles/bootstrap.min.css',
       'dist/scripts/' + baseFilename,
       'dist/scripts/' + coreAreaFilename,
+      'dist/scripts/' + startupFilename,
       'dist/scripts/' + featureAreaFilename,
       'app/_areas.release.js',
       'app/_routes.release.js'

@@ -169,6 +169,10 @@ var JasperUtils = function () {
     return crypto.createHash('md5').update(content).digest('hex');
   };
 
+  this.getFileVersion = function (filepath) {
+    return this.computeMd5(fs.readFileSync(filepath, 'utf8'));
+  };
+
   this.appendFileVersion = function (filepath, appendTo) {
     var md5 = this.computeMd5(fs.readFileSync(filepath, 'utf8'));
     return appendTo + '?v=' + md5;

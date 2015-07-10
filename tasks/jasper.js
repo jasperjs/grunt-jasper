@@ -424,7 +424,7 @@ module.exports = function (grunt) {
         var areaPath = options.packageOutput + '/scripts/' + area.name + '.js';
         var destPath = options.packageOutput + '/scripts/', filename;
         if (options.fileVersion) {
-          var version = utils.computeMd5(areaPath);
+          var version = utils.getFileVersion(areaPath);
           filename = area.name + '.' + version + '.min.js'
         } else {
           filename = area.name + '.min.js'
@@ -562,7 +562,7 @@ module.exports = function (grunt) {
       return;
     // concat base
     var uglifyConf = grunt.config('uglify') || {};
-    var baseMinVersion = utils.computeMd5(baseScript.path);
+    var baseMinVersion = utils.getFileVersion(baseScript.path);
     baseScript.minfilename = '_base.' + (options.fileVersion ? baseMinVersion : '') + '.min.js';
     baseScript.minpath = options.packageOutput + '/scripts/' + baseScript.minfilename;
     uglifyConf.jasperbase = {files: {}};
@@ -615,7 +615,7 @@ module.exports = function (grunt) {
       return;
     // concat startup
     var uglifyConf = grunt.config('uglify') || {};
-    var startupMinVersion = utils.computeMd5(startupScript.path);
+    var startupMinVersion = utils.getFileVersion(startupScript.path);
     startupScript.minfilename = '_startup.' + (options.fileVersion ? startupMinVersion : '') + '.min.js';
     startupScript.minpath = options.packageOutput + '/scripts/' + startupScript.minfilename ;
     uglifyConf.jasperstartup = {files: {}};
