@@ -93,7 +93,9 @@ module.exports = function (grunt) {
        */
       fileVersion: false,
 
-      baseHref: '/'
+      baseHref: '',
+      jDebugEnabled: false,
+      jDebugSrc: 'node_modules/jdebug/lib/jdebug.js'
     });
 
     baseScripts = options.baseScripts;
@@ -311,7 +313,7 @@ module.exports = function (grunt) {
     });
   });
 
-  grunt.registerTask('jasperPackageStyles', function(){
+  grunt.registerTask('jasperPackageStyles', function () {
     if (!options.package)
       return; // execute on package process only
     var cssMinConf = grunt.config('cssmin') || {};
@@ -433,10 +435,10 @@ module.exports = function (grunt) {
         uglifyFiles[destPath + filename] = areaPath;
 
         packagedAreasPaths[area.name] = filename;
-        runUglify=  true;
+        runUglify = true;
       }
     });
-    if(runUglify){
+    if (runUglify) {
       uglifyConf.dest = {
         files: uglifyFiles
       };
@@ -617,7 +619,7 @@ module.exports = function (grunt) {
     var uglifyConf = grunt.config('uglify') || {};
     var startupMinVersion = utils.getFileVersion(startupScript.path);
     startupScript.minfilename = '_startup.' + (options.fileVersion ? startupMinVersion : '') + '.min.js';
-    startupScript.minpath = options.packageOutput + '/scripts/' + startupScript.minfilename ;
+    startupScript.minpath = options.packageOutput + '/scripts/' + startupScript.minfilename;
     uglifyConf.jasperstartup = {files: {}};
     uglifyConf.jasperstartup.files[startupScript.minpath] = startupScript.path;
     grunt.config('uglify', uglifyConf);
@@ -633,10 +635,13 @@ module.exports = function (grunt) {
     /* patch scripts */
     var scripts = [];
     if (options.package) {
-      scripts.push( packageScriptsReferencePath + baseScript.minfilename);
-      scripts.push( packageScriptsReferencePath + startupScript.minfilename);
+      scripts.push(packageScriptsReferencePath + baseScript.minfilename);
+      scripts.push(packageScriptsReferencePath + startupScript.minfilename);
     } else {
       scripts = baseScripts.concat(startupScripts);
+      if (options.jDebugEnabled) {
+        scripts.push(options.jDebugSrc);
+      }
     }
 
     var scriptsHtml = '';

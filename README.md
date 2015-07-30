@@ -115,6 +115,19 @@ Default value: false
 
 If true task will append MD5 hash of content of application scripts, during package process to avoid client cache. 'scripts/_base.min.js' --> 'scripts/base.min.js?v=c5fa12138e2da9ddb6023f11533777c0'
 
+#### options.jDebugEnabled
+type: 'Boolean'
+Default value: false
+
+Is jDebug enabled. If enabled task will reference to index page jDebugSrc script if options.package == false.
+
+#### options.jDebugSrc
+type: 'String'
+Default value: 'node_modules/jdebug/lib/jdebug.js'
+
+Specifies a path to jDebug client side library.
+
+
 ### Usage Examples
 
 In this example, the options are used to build and package jasper application. Two target are used: for development process (debug) and package (release).

@@ -68,7 +68,8 @@ module.exports = function (grunt) {
           ]
         },
         fileVersion: true,
-        defaultRoutePath: '/'
+        defaultRoutePath: '/',
+        jDebugEnabled: true
       },
 
       debug: {

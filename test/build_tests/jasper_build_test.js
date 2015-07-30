@@ -30,18 +30,6 @@ var getConfig = function () {
   return grunt.config('jasper').options;
 };
 
-var processSystemPaths = function (path) {
-  var config = getConfig();
-  var wildcards = {
-    '%areas_config%': config.appPath + '/_areas.debug.js',
-    '%values_config%': config.appPath + '/_values.debug.js',
-    '%routes_config%': config.appPath + '/_routes.debug.js'
-  };
-  if (wildcards[path]) {
-    return wildcards[path];
-  }
-  return path;
-};
 
 var ensurePartsExistence = function (test, content, parts) {
   parts.forEach(function (part) {
@@ -58,11 +46,13 @@ exports.jasper = {
 
   testIndexPageScripts: function (test) {
     var scripts = this.config.baseScripts;
+    scripts.push('node_modules/jdebug/lib/jdebug.js'); // jDebug script
+
     var indexPageContent = grunt.file.read(path.join(appPath, 'index.html'));
 
     scripts.forEach(function (path) {
-      var scriptReferenceText = '<script src="/' + processSystemPaths(path) + '"></script>';
-      test.ok(indexPageContent.indexOf(scriptReferenceText) >= 0, 'Page content must contain ' + processSystemPaths(path) + ' reference');
+      var scriptReferenceText = '<script src="' + path + '"></script>';
+      test.ok(indexPageContent.indexOf(scriptReferenceText) >= 0, 'Page content must contain ' + path + ' reference');
     });
 
     test.done();
@@ -73,7 +63,7 @@ exports.jasper = {
     var styles = grunt.file.expand(path.join(appPath, '/app/**/*.css'));
     var parts = ['test/testApp/base.css'];
     styles.forEach(function (path) {
-      parts.push('<link rel="stylesheet" href="/' + path + '"/>');
+      parts.push('<link rel="stylesheet" href="' + path + '"/>');
     });
     ensurePartsExistence(test, indexPageContent, parts);
 
