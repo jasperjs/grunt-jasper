@@ -565,7 +565,7 @@ module.exports = function (grunt) {
     // concat base
     var uglifyConf = grunt.config('uglify') || {};
     var baseMinVersion = utils.getFileVersion(baseScript.path);
-    baseScript.minfilename = '_base.' + (options.fileVersion ? baseMinVersion : '') + '.min.js';
+    baseScript.minfilename = '_base' + (options.fileVersion ? '.' + baseMinVersion : '') + '.min.js';
     baseScript.minpath = options.packageOutput + '/scripts/' + baseScript.minfilename;
     uglifyConf.jasperbase = {files: {}};
     uglifyConf.jasperbase.files[baseScript.minpath] = baseScript.path;
@@ -618,7 +618,7 @@ module.exports = function (grunt) {
     // concat startup
     var uglifyConf = grunt.config('uglify') || {};
     var startupMinVersion = utils.getFileVersion(startupScript.path);
-    startupScript.minfilename = '_startup.' + (options.fileVersion ? startupMinVersion : '') + '.min.js';
+    startupScript.minfilename = '_startup' + (options.fileVersion ? '.' + startupMinVersion : '') + '.min.js';
     startupScript.minpath = options.packageOutput + '/scripts/' + startupScript.minfilename;
     uglifyConf.jasperstartup = {files: {}};
     uglifyConf.jasperstartup.files[startupScript.minpath] = startupScript.path;
