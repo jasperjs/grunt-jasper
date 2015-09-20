@@ -95,7 +95,8 @@ module.exports = function (grunt) {
 
       baseHref: '',
       jDebugEnabled: false,
-      jDebugSrc: 'node_modules/jdebug/lib/jdebug.js'
+      jDebugSrc: 'node_modules/jdebug/lib/jdebug.js',
+      jDebugStylePath: ''
     });
 
     baseScripts = options.baseScripts;
@@ -195,6 +196,8 @@ module.exports = function (grunt) {
       var configurations = grunt.file.expand(area.__path + '/**/_definition.json');
 
       var registerDefinition = function (config, def) {
+        var jDebugInfo = {};
+        jDebugInfo.path = config;
         if (!def.name) {
           var tagName = utils.getParentFolderName(config);
           def.name = utils.camelCaseTagName(tagName);
@@ -270,7 +273,12 @@ module.exports = function (grunt) {
           areaDefinitions.push(templateDefinition);
         }
 
+        if(options.jDebugEnabled && !options.package){
+          def.jDebug = jDebugInfo;
+        }
+
         areaDefinitions.push(def);
+
       };
 
       configurations.forEach(function (config) {
@@ -668,7 +676,9 @@ module.exports = function (grunt) {
       }
     } else {
       styles = utils.getAppStyles(grunt, options.baseCss, options.appPath);
-
+      if(options.jDebugEnabled && options.jDebugStylePath){
+        styles.push(options.jDebugStylePath);
+      }
     }
 
     var stylesHtml = '';

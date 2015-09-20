@@ -69,7 +69,8 @@ module.exports = function (grunt) {
         },
         fileVersion: true,
         defaultRoutePath: '/',
-        jDebugEnabled: true
+        jDebugEnabled: true,
+        jDebugStylePath: 'path/to/jdebug.css'
       },
 
       debug: {

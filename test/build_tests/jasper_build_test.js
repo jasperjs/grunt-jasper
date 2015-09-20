@@ -61,6 +61,9 @@ exports.jasper = {
   testIndexPageStyles: function (test) {
     var indexPageContent = grunt.file.read(path.join(appPath, 'index.html'));
     var styles = grunt.file.expand(path.join(appPath, '/app/**/*.css'));
+
+    styles.push('path/to/jdebug.css');//jDebug styles
+
     var parts = ['test/testApp/base.css'];
     styles.forEach(function (path) {
       parts.push('<link rel="stylesheet" href="' + path + '"/>');
@@ -128,11 +131,11 @@ exports.jasper = {
     var areaInitContent = grunt.file.read(areaInitPath);
 
     var contentParts = [
-      'jsp.component({"ctrl":spa.core.components.SiteFooter,"name":"siteFooter","templateUrl":"test/testApp/app/core/components/site-footer/site-footer.html"})',
+      'jsp.component({"ctrl":spa.core.components.SiteFooter,"name":"siteFooter","templateUrl":"test/testApp/app/core/components/site-footer/site-footer.html","jDebug":{"path":',
       'jsp.template(\'#_page_homePage\',\'<home-page></home-page>\')',
-      'jsp.component({"ctrl":spa.core.components.SiteHeader,"properties":["myAttr"],"events":["click"],"name":"siteHeader","templateUrl":"test/testApp/app/core/components/site-header/site-header.html"})',
+      'jsp.component({"ctrl":spa.core.components.SiteHeader,"properties":["myAttr"],"events":["click"],"name":"siteHeader","templateUrl":"test/testApp/app/core/components/site-header/site-header.html","jDebug":{"path":',
       'jsp.component({"route":"/","ctrl":spa.core.pages.HomePage',
-      'jsp.decorator({"ctrl":spa.core.decorators.FocusOnDefault,"name":"focusOnDefault"})',
+      'jsp.decorator({"ctrl":spa.core.decorators.FocusOnDefault,"name":"focusOnDefault","jDebug":{"path":',
       'jsp.template(\'template\',\'<p>custom template</p>\');'
     ];
 
@@ -145,9 +148,9 @@ exports.jasper = {
     areaInitContent = grunt.file.read(areaInitPath);
 
     contentParts = [
-      'jsp.component({"ctrl":spa.feature.components.FeatureTag,"name":"featureTag","templateUrl":"test/testApp/app/feature/components/feature-tag/feature-tag.html"})',
-      'jsp.decorator({"ctrl":spa.feature.components.RedColor,"name":"redColor"})',
-      'jsp.filter({"name":"currency","ctrl":spa.feature.filters.Currency})'
+      'jsp.component({"ctrl":spa.feature.components.FeatureTag,"name":"featureTag","templateUrl":"test/testApp/app/feature/components/feature-tag/feature-tag.html","jDebug":{"path":',
+      'jsp.decorator({"ctrl":spa.feature.components.RedColor,"name":"redColor","jDebug":{"path":',
+      'jsp.filter({"name":"currency","ctrl":spa.feature.filters.Currency,"jDebug":{"path":'
     ];
 
     ensurePartsExistence(test, areaInitContent, contentParts);
