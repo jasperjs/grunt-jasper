@@ -96,7 +96,7 @@ module.exports = function (grunt) {
       baseHref: '',
       jDebugEnabled: false,
       jDebugSrc: 'node_modules/jdebug/lib/jdebug.js',
-      jDebugStylePath: ''
+      jDebugStylePath: 'node_modules/jdebug/lib/jdebug.css'
     });
 
     baseScripts = options.baseScripts;
