@@ -16,7 +16,7 @@ module.exports = function (grunt) {
   grunt.initConfig({
 
     typescript: {
-      base: {
+      testapp: {
         src: ['test/testApp/app/**/*.ts'],
         options: {
           module: 'amd', //or commonjs
@@ -27,6 +27,19 @@ module.exports = function (grunt) {
             'typed/*.d.ts'
           ]
         }
+      },
+      lib: {
+        options: {
+          module: 'commonjs', //or commonjs
+          target: 'es5', //or es3
+          sourceMap: false,
+          declaration: false,
+          references: [
+            'typed/**/*.d.ts'
+          ],
+          generateTsConfig: true
+        },
+        src: ['lib/**/*.ts', 'test/unit/**/*.ts']
       }
     },
 
@@ -60,7 +73,7 @@ module.exports = function (grunt) {
         startup: 'test/testApp/app/bootstrap.js',
 
         baseCss: {
-          'bootstrap.min.css':[
+          'bootstrap.min.css': [
             'test/testApp/bootstrap.css'
           ],
           'all.min.css': [
@@ -74,7 +87,7 @@ module.exports = function (grunt) {
       },
 
       debug: {
-        options:{
+        options: {
           package: false,
           values: 'test/testApp/config/debug.json'
         }
@@ -91,7 +104,8 @@ module.exports = function (grunt) {
     // Unit tests.
     nodeunit: {
       build: ['test/build_tests/*_test.js'],
-      package: ['test/package_tests/*_test.js']
+      package: ['test/package_tests/*_test.js'],
+      unit: ['test/unit/**/*.js']
     }
 
   });
@@ -109,5 +123,8 @@ module.exports = function (grunt) {
 
   // By default, lint and run all tests.
   grunt.registerTask('default', ['jasper']);
+
+  // Build lib and run unit tests
+  grunt.registerTask('unit', ['typescript:lib', 'nodeunit:unit']);
 
 };

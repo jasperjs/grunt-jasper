@@ -20,19 +20,23 @@
   "license": "MIT",
   "devDependencies": {
     "grunt-contrib-clean": "~0.5.0",
-    "grunt-contrib-jshint": "~0.8.0",
-    "grunt-contrib-nodeunit": "~0.3.0",
-    "jshint-stylish": "~0.1.5",
-    "load-grunt-tasks": "~0.3.0",
     "grunt-contrib-concat": "^0.5.0",
     "grunt-contrib-cssmin": "^0.11.0",
+    "grunt-contrib-jshint": "~0.8.0",
+    "grunt-contrib-nodeunit": "~0.3.0",
     "grunt-contrib-uglify": "^0.7.0",
-    "grunt-typescript": "^0.6.1"
+    "grunt-typescript": "^0.7.0",
+    "jshint-stylish": "~0.1.5",
+    "load-grunt-tasks": "~0.3.0",
+    "typescript": "^1.6.2"
   },
   "peerDependencies": {
     "grunt": "^0.4.0"
   },
   "scripts": {
     "test": "grunt test"
+  },
+  "dependencies": {
+    "glob": "^5.0.15"
   }
 }
