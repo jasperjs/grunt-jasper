@@ -37,6 +37,7 @@
     "test": "grunt test"
   },
   "dependencies": {
+    "clean-css": "^3.4.6",
     "glob": "^5.0.15"
   }
 }
