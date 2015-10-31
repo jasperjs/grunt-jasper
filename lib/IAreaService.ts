@@ -114,39 +114,20 @@ export class AreaService implements IAreaService {
     return this.structure;
   }
 
-  private stringifyClientJson(def:structure.IProjectDefinition):string {
-    // custom format to javascript to pass ctrl object instead of string
-    var jsonDef = '{', delimeter = '';
-    for (var prop in def) {
-      if (prop.indexOf('__') === 0) continue; //private property
-      if (def.hasOwnProperty(prop)) {
-        var val = def[prop];
-        if (prop === 'ctor' || prop === 'ctrl') {
-          jsonDef += delimeter + '\"' + prop + '\"' + ':' + val + '';
-        } else {
-          jsonDef += delimeter + '\"' + prop + '\"' + ':' + JSON.stringify(val);
-        }
-        delimeter = ',';
-      }
-    }
-    jsonDef += '}';
-    return jsonDef;
-  }
-
   private componentRegistration(component:structure.IProjectDefinition) {
-    return this.registerByMethod('component', this.stringifyClientJson(component));
+    return this.registerByMethod('component', utils.stringifyClientJson(component));
   }
 
   private decoratorRegistration(component:structure.IProjectDefinition) {
-    return this.registerByMethod('decorator', this.stringifyClientJson(component));
+    return this.registerByMethod('decorator', utils.stringifyClientJson(component));
   }
 
   private filterRegistration(component:structure.IProjectDefinition) {
-    return this.registerByMethod('filter', this.stringifyClientJson(component));
+    return this.registerByMethod('filter', utils.stringifyClientJson(component));
   }
 
   private serviceRegistration(component:structure.IProjectDefinition) {
-    return this.registerByMethod('service', this.stringifyClientJson(component));
+    return this.registerByMethod('service', utils.stringifyClientJson(component));
   }
 
   private registerByMethod(methodName, componentJsonDef) {

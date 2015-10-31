@@ -19,27 +19,60 @@ export class ProjectStructureBuilder implements IProjectStructureBuilder {
   }
 
   buildStructure():project.IProjectStructure {
+    var areas = this.buildAreas();
     return {
-      areas: this.getAreas()
+      areas: areas,
+      routes: this.buildRoutesConfig(areas),
+      values: this.buildValues()
     };
   }
 
-  private getAreas():project.IAreaDefinition[] {
+  private buildValues():project.ValuesConfig {
+    if (!this.config.values) {
+      return null;
+    }
+    if (!this.fileUtils.fileExists(this.config.values)) {
+      throw `Values configuration file not found at '${this.config.values}'`;
+    }
+    var valuesConfig = this.fileUtils.readJSON(this.config.values);
+    var result = new project.ValuesConfig();
+    var keys = Object.keys(valuesConfig);
+    if (keys.length) {
+      keys.forEach(key => {
+        result.values.push(new project.KeyValuePair(key, valuesConfig[key]));
+      });
+    }
+    return result;
+  }
+
+  private buildRoutesConfig(areas:project.IAreaDefinition[]):project.RoutesConfig {
+    var result = new project.RoutesConfig();
+    result.defaultRoutePath = this.config.defaultRoutePath || '/';
+    result.pages = [];
+    areas.forEach(area => {
+      result.pages = result.pages.concat(area.__definitions.filter(d => d.__type.toUpperCase() === 'PAGE'));
+    });
+    return result;
+  }
+
+  private buildAreas():project.IAreaDefinition[] {
     var areasMask = path.join(this.config.appPath, '/**/_area.json');
     var areasDefinitionFiles = this.fileUtils.expand(areasMask);
 
     var areas:project.IAreaDefinition[] = [];
     areasDefinitionFiles.forEach((configFile) => {
       var areaConfig = this.fileUtils.readJSON<any>(configFile);
+
       var areaPath = utils.getPath(configFile);
+      var areaName = areaConfig.name || utils.getParentFolderName(configFile);
       var area:project.IAreaDefinition = {
         dependencies: areaConfig.dependencies || [],
-        name: areaConfig.name || utils.getParentFolderName(configFile),
+        name: areaName,
         scripts: (areaConfig.scripts || []).concat(this.scriptsFinder.findRecursive(areaPath)),
 
         __styles: this.stylesFinder.findRecursive(areaPath),
         __path: areaPath,
-        __definitions: this.getAreaDefinitions(areaPath)
+        __definitions: this.getAreaDefinitions(areaPath, areaName)
       };
 
 
@@ -68,7 +101,7 @@ export class ProjectStructureBuilder implements IProjectStructureBuilder {
 
   }
 
-  private getAreaDefinitions(areaPath:string):project.IProjectDefinition[] {
+  private getAreaDefinitions(areaPath:string, areaName:string):project.IProjectDefinition[] {
 
     var definitions:Array<project.IProjectDefinition> = [],
       areaDefMask = path.join(areaPath, '/**/_definition.json'),
@@ -77,22 +110,22 @@ export class ProjectStructureBuilder implements IProjectStructureBuilder {
     defPaths.forEach(defPath => {
       var def = this.fileUtils.readJSON<any>(defPath);
       if (Array.isArray(def)) {
-        definitions = definitions.concat(def.map((d) => this.mapToDefinition(defPath, d)));
+        definitions = definitions.concat(def.map((d) => this.mapToDefinition(defPath, d, areaName)));
       } else {
-        definitions.push(this.mapToDefinition(defPath, def));
+        definitions.push(this.mapToDefinition(defPath, def, areaName));
       }
     });
     return definitions;
 
   }
 
-  private mapToDefinition(configPath:string, def:any):project.IProjectDefinition {
+  private mapToDefinition(configPath:string, def:any, areaName:string):project.IProjectDefinition {
     var type = def.type || 'component';
-    var result: project.IProjectDefinition = def;
+    var result:project.IProjectDefinition = def;
     result.__type = type;
     delete result['type'];
 
-    if(!result.name){
+    if (!result.name) {
       result.name = utils.camelCaseTagName(utils.getParentFolderName(configPath));
     }
 
@@ -125,11 +158,9 @@ export class ProjectStructureBuilder implements IProjectStructureBuilder {
       delete result.events;
     }
 
-    //if (def.type.toUpperCase() === 'PAGE') {
-    //  if (!def.area)
-    //    def.area = area.name;
-    //  pages.push(def);
-    //}
+    if (def.__type.toUpperCase() === 'PAGE') {
+      def.area = areaName;
+    }
     //
     //def.__path = utils.getPath(config);
     var folderPath = utils.getPath(configPath);

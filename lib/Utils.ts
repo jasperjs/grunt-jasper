@@ -1,6 +1,6 @@
 import fs = require('fs');
 import path = require('path');
-
+import structure = require('./project/Structure');
 class Utils {
 
   /**
@@ -130,6 +130,26 @@ class Utils {
     return name.replace(SNAKE_CASE_REGEXP, function (letter, pos) {
       return (pos ? separator : '') + letter.toLowerCase();
     });
+  }
+
+
+  stringifyClientJson(def:structure.IProjectDefinition):string {
+    // custom format to javascript to pass ctrl object instead of string
+    var jsonDef = '{', delimeter = '';
+    for (var prop in def) {
+      if (prop.indexOf('__') === 0) continue; //private property
+      if (def.hasOwnProperty(prop)) {
+        var val = def[prop];
+        if (prop === 'ctor' || prop === 'ctrl') {
+          jsonDef += delimeter + '\"' + prop + '\"' + ':' + val + '';
+        } else {
+          jsonDef += delimeter + '\"' + prop + '\"' + ':' + JSON.stringify(val);
+        }
+        delimeter = ',';
+      }
+    }
+    jsonDef += '}';
+    return jsonDef;
   }
 
 }

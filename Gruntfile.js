@@ -105,7 +105,7 @@ module.exports = function (grunt) {
     nodeunit: {
       build: ['test/build_tests/*_test.js'],
       package: ['test/package_tests/*_test.js'],
-      unit: ['test/unit/**/*.js']
+      unit: ['test/unit/*.js']
     }
 
   });

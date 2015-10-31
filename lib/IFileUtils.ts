@@ -14,12 +14,14 @@ export interface IFileUtils {
 
   fileExists(filename:string): boolean;
 
-  expand(pattern: string): string[];
+  expand(pattern:string): string[];
+
+  concat(filenames:string[]): string;
 }
 
 export class DefaultFileUtils implements IFileUtils {
 
-  constructor(private config: config.IJasperBuildConfig){
+  constructor(private config:config.IJasperBuildConfig) {
 
   }
 
@@ -55,8 +57,19 @@ export class DefaultFileUtils implements IFileUtils {
     }
   }
 
-  expand(pattern: string): string[]{
-     return glob.sync(pattern, { cwd: this.config.cwd });
+  expand(pattern:string):string[] {
+    return glob.sync(pattern, {cwd: this.config.cwd});
   }
 
+  concat(filenames:string[]):string {
+    // Iterate over all src-dest file pairs.
+    var buffer = '';
+    filenames.forEach((filename:string) => {
+      if (!this.fileExists(filename)) {
+        throw `File "${filename}" does not exists`;
+      }
+      buffer += this.readFile(filename);
+    });
+    return buffer;
+  }
 }

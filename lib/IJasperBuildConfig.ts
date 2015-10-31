@@ -22,7 +22,7 @@ export interface IJasperBuildConfig {
   defaultRoutePath: string;
 
   baseScripts: string[];
-  baseCss: string[];
+  baseCss: string[]|Object;
 
   /**
    * path to bootstrap file
@@ -33,6 +33,11 @@ export interface IJasperBuildConfig {
    * Include MD5 hash of file content after package
    */
   fileVersion: boolean;
+
+  /**
+   * Path to client values JSON config file
+   */
+  values: string;
 
   jDebugEnabled: boolean; //false,
   jDebugSrc: string; // 'node_modules/jdebug/lib/jdebug.js',
@@ -54,6 +59,8 @@ export class DefaultBuildConfig implements IJasperBuildConfig {
   packageOutput: string = 'dist';
 
   singlePage: string = 'index.html';
+
+  values: string = null;
 
   /**
    * Name of the build process

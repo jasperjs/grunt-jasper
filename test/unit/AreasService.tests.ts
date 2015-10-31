@@ -1,16 +1,16 @@
 import config = require('../../lib/IJasperBuildConfig');
-import f = require('../../lib/IFileUtils');
+import f = require('./mocks/TestFileUtils');
 import builder = require('../../lib/project/ProjectStructureBuilder');
 import finder  = require('../../lib/IFinder');
 import areas  = require('../../lib/IAreaService');
 
-var areasSvc:areas.IAreaService, fUtils:TestFileUtils;
+var areasSvc:areas.IAreaService, fUtils:f.TestFileUtils;
 
 export function setUp(done:Function) {
   var buildConfig = new config.DefaultBuildConfig();
   buildConfig.appPath = 'test/testApp';
 
-  fUtils = new TestFileUtils(buildConfig);
+  fUtils = new f.TestFileUtils(buildConfig);
   var scriptsFinder = new finder.TypeScriptFinder(fUtils);
   var stylesFinder = new finder.CssFinder(fUtils);
   var projectStructureBuilder = new builder.ProjectStructureBuilder(fUtils, buildConfig, scriptsFinder, stylesFinder)
@@ -37,31 +37,4 @@ export function testCreationInitFiles(test:nodeunit.Test) {
   test.ok(fUtils.checkFileContains('test\\testApp\\app\\feature\\_init.js', `jsp.filter({"name":"currency","ctrl":spa.feature.filters.Currency})`));
 
   test.done();
-}
-
-
-class TestFileUtils extends f.DefaultFileUtils {
-
-  private files = [];
-
-
-  writeFile(filename:string, data:string) {
-    this.files[filename] = data;
-  }
-
-  isWritten(filename:string):boolean {
-    return !!this.files[filename];
-  }
-
-  checkFileContains(filename:string, content:string):boolean {
-    if (!this.isWritten(filename)) {
-      throw `File "${filename}" does not contain "${content}" part. File does not exist.`
-    }
-    var contains =  this.files[filename].indexOf(content) >= 0;
-    if(!contains){
-      throw `File "${filename}" does not contain "${content}" part. File content: "${this.files[filename]}"`;
-    }
-    return true;
-  }
-
 }
