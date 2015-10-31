@@ -24,6 +24,8 @@ export interface IJasperBuildConfig {
   baseScripts: string[];
   baseCss: string[]|Object;
 
+  baseHref: string;
+
   /**
    * path to bootstrap file
    */
@@ -60,6 +62,8 @@ export class DefaultBuildConfig implements IJasperBuildConfig {
 
   singlePage: string = 'index.html';
 
+  baseHref: string = '';
+
   values: string = null;
 
   /**
@@ -72,7 +76,7 @@ export class DefaultBuildConfig implements IJasperBuildConfig {
   defaultRoutePath: string = '/';
 
   baseScripts: string[] = [];
-  baseCss: string[] = [];
+  baseCss: string[]|Object = [];
 
   /**
    * path to bootstrap file

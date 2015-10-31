@@ -4,23 +4,23 @@ import builder = require('../../lib/project/ProjectStructureBuilder');
 import finder  = require('../../lib/IFinder');
 import areas  = require('../../lib/IAreaService');
 
-var areasSvc:areas.IAreaService, fUtils:f.TestFileUtils;
+var areasSvc:areas.IAreaService, fUtils:f.TestFileUtils, projectStructureBuilder:builder.ProjectStructureBuilder ;
 
 export function setUp(done:Function) {
   var buildConfig = new config.DefaultBuildConfig();
   buildConfig.appPath = 'test/testApp';
 
-  fUtils = new f.TestFileUtils(buildConfig);
+  fUtils = new f.TestFileUtils();
   var scriptsFinder = new finder.TypeScriptFinder(fUtils);
   var stylesFinder = new finder.CssFinder(fUtils);
-  var projectStructureBuilder = new builder.ProjectStructureBuilder(fUtils, buildConfig, scriptsFinder, stylesFinder)
-  areasSvc = new areas.AreaService(fUtils, projectStructureBuilder);
+  projectStructureBuilder = new builder.ProjectStructureBuilder(fUtils, buildConfig, scriptsFinder, stylesFinder)
+  areasSvc = new areas.AreaService(fUtils);
 
   done();
 }
 
 export function testCreationInitFiles(test:nodeunit.Test) {
-  areasSvc.buildAllAreas();
+  areasSvc.buildAllAreas(projectStructureBuilder.buildStructure());
 
   test.ok(fUtils.isWritten('test\\testApp\\app\\boot\\_init.js'));
   test.ok(fUtils.isWritten('test\\testApp\\app\\core\\_init.js'));

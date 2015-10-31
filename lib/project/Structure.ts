@@ -98,8 +98,8 @@ export class AreasClientOptions {
 
   toClientConfigScript():string {
     var clientConfig = JSON.stringify(this);
-    return
-    `angular.module("jasperAreasConfig", ["jasperAreas"])
+
+    return `angular.module("jasperAreasConfig", ["jasperAreas"])
   .value("$jasperAreasConfig", ${clientConfig})
   .run(['jasperAreasService', '$jasperAreasConfig', function (jasperAreasService, $jasperAreasConfig) {
     jasperAreasService.configure($jasperAreasConfig);
@@ -144,11 +144,11 @@ export class RoutesConfig {
     var config = {};
     this.pages.forEach(page=>{
       config[page.name] = page;
+      delete page.__type;
     });
-    return
-    `angular.module('jasperRouteConfig',['jasper'])
-      .config(['jasperRouteProvider', function(jasperRouteTable){
-        jasperRouteTable.setup({'defaultRoutePath':'${this.defaultRoutePath}','routes': ${config}});
+    return `angular.module('jasperRouteConfig',['jasper'])
+      .config(['jasperRouteProvider', function(jasperRouteTable) {
+        jasperRouteTable.setup({'defaultRoutePath':'${this.defaultRoutePath}','routes': ${JSON.stringify(config)}});
       }]);`
   }
 }
@@ -166,8 +166,7 @@ export class ValuesConfig {
       registrationScript += `v.register('${pair.key}','${JSON.stringify(pair.value)}');`
     });
 
-    return
-    `angular.module('jasperValuesConfig',['jasper'])
+    return `angular.module('jasperValuesConfig',['jasper'])
       .config(["jasperConstantProvider", function(v){${registrationScript}}]);`;
   }
 }

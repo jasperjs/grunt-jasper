@@ -1,11 +1,10 @@
 import config = require('../../lib/IJasperBuildConfig');
 import f = require('../../lib/IFileUtils');
 
-var utils: f.IFileUtils, buildConfig: config.DefaultBuildConfig;
+var utils: f.IFileUtils;
 
 export function setUp(done: Function) {
-  buildConfig = new config.DefaultBuildConfig();
-  utils = new f.DefaultFileUtils(buildConfig);
+  utils = new f.DefaultFileUtils();
   done();
 }
 

@@ -39,7 +39,7 @@ module.exports = function (grunt) {
           ],
           generateTsConfig: true
         },
-        src: ['lib/**/*.ts', 'test/unit/**/*.ts']
+        src: ['lib/**/*.ts', 'test/unit/**/*.ts', 'test/build/**/*.ts', 'test/package/**/*.ts']
       }
     },
 
@@ -73,12 +73,7 @@ module.exports = function (grunt) {
         startup: 'test/testApp/app/bootstrap.js',
 
         baseCss: {
-          'bootstrap.min.css': [
-            'test/testApp/bootstrap.css'
-          ],
-          'all.min.css': [
-            'test/testApp/base.css'
-          ]
+
         },
         fileVersion: true,
         defaultRoutePath: '/',
@@ -103,8 +98,8 @@ module.exports = function (grunt) {
 
     // Unit tests.
     nodeunit: {
-      build: ['test/build_tests/*_test.js'],
-      package: ['test/package_tests/*_test.js'],
+      build: ['test/build/*.tests.js'],
+      package: ['test/package/*.tests.js'],
       unit: ['test/unit/*.js']
     }
 
@@ -115,11 +110,11 @@ module.exports = function (grunt) {
 
   // Whenever the "test" task is run, first clean the "tmp" dir, then run this
   // plugin's task(s), then test the result.
-  grunt.registerTask('test-build', ['clean', 'typescript', 'jasper:debug', 'nodeunit:build']);
+  grunt.registerTask('test-build', ['clean', 'typescript', 'nodeunit:build']);
 
-  grunt.registerTask('test-package', ['clean', 'typescript', 'jasper:release', 'nodeunit:package']);
+  grunt.registerTask('test-package', ['clean', 'typescript', 'nodeunit:package']);
 
-  grunt.registerTask('test', ['test-build', 'test-package']);
+  grunt.registerTask('test', [/*'test-build', */'test-package']);
 
   // By default, lint and run all tests.
   grunt.registerTask('default', ['jasper']);

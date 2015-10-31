@@ -4,36 +4,82 @@ import cssmin =require('./Tools/ICssMinifier');
 import min  =require('./Tools/IScriptMinifier');
 import config = require('./IJasperBuildConfig');
 import files = require('./IFileUtils');
+import utils = require('./Utils');
 
 import path = require('path');
 import crypto = require('crypto');
 
-export interface IPackageManager {
+import log = require('./ILogger');
+
+export interface IPackageBuilder {
 
   packageApp(structure:project.IProjectStructure);
 
 }
 
-export class PackageManager implements IPackageManager {
+export class PackageBuilder implements IPackageBuilder {
+
+  private scriptsFolder = 'scripts';
 
   constructor(private cssMinifier:cssmin.ICssMinifier,
               private scriptsMinifier:min.IScriptMinifier,
               private jasperConfig:config.IJasperBuildConfig,
-              private fileUtils:files.IFileUtils) {
+              private fileUtils:files.IFileUtils,
+              private logger:log.ILogger) {
 
   }
 
   packageApp(structure:project.IProjectStructure) {
+
     this.packageStyles(structure);
-    this.packageAreasScripts(structure);
 
+    var areasConfig = this.packageAreasScripts(structure);
 
+    var baseMinPath = this.packageBaseScripts();
+    var startupMinPath = this.buildStartupScript(structure, areasConfig);
+
+    this.logger.info(`Base script created at '${baseMinPath}'`);
+    this.logger.info(`Startup script created at '${startupMinPath}'`);
+  }
+
+  private packageBaseScripts():string {
+    var baseScripts = this.jasperConfig.baseScripts || [];
+
+    var baseScriptContent = this.fileUtils.concat(baseScripts);
+    var filename = '_base.' + (this.jasperConfig.fileVersion ? this.getFileVersion(baseScriptContent) + '.' : '') + 'min.js';
+    var destMin = path.join(this.jasperConfig.packageOutput, this.scriptsFolder, filename);
+    this.scriptsMinifier.minify(baseScriptContent, destMin);
+
+    return destMin;
+  }
+
+  private buildStartupScript(structure:project.IProjectStructure, areasConfig:project.AreasClientOptions):string {
+    var startupScriptContent = '';
+    //append areas client config:
+    startupScriptContent += areasConfig.toClientConfigScript();
+    //append routes config
+    startupScriptContent += structure.routes.toClientConfigScript();
+    //append values config
+    if (structure.values) {
+      startupScriptContent += structure.values.toClientConfigScript();
+    }
+
+    if (this.jasperConfig.startup) {
+      startupScriptContent += this.fileUtils.readFile(this.jasperConfig.startup);
+    }
+
+    var filename = '_startup.' + (this.jasperConfig.fileVersion ? this.getFileVersion(startupScriptContent) + '.' : '') + 'min.js';
+    var destMin = path.join(this.jasperConfig.packageOutput, this.scriptsFolder, filename);
+    this.scriptsMinifier.minify(startupScriptContent, destMin);
+    return destMin;
   }
 
   /**
    *  Search all app files
    */
   private packageStyles(structure:project.IProjectStructure) {
+    this.logger.info('Packaging styles...');
+
     // build CSS styles:
     var stylesMinDest = path.join(this.jasperConfig.packageOutput, 'styles');
 
@@ -47,7 +93,9 @@ export class PackageManager implements IPackageManager {
     });
 
     cssTargets.forEach(target => {
-      this.cssMinifier.minifyCss(target.files, path.join(stylesMinDest, target.filename));
+      var cssPath = path.join(stylesMinDest, target.filename);
+      this.cssMinifier.minifyCss(target.files, cssPath);
+      this.logger.info(`Styles created at '${cssPath}'`);
     });
   }
 
@@ -55,6 +103,7 @@ export class PackageManager implements IPackageManager {
    * Concat and minify all areas scripts
    */
   private packageAreasScripts(structure:project.IProjectStructure):project.AreasClientOptions {
+    this.logger.info('Packaging areas scripts...');
     var options = new project.AreasClientOptions();
     structure.areas.forEach((area) => {
       // fetch external scripts that we can't concat
@@ -63,11 +112,14 @@ export class PackageManager implements IPackageManager {
       var content = this.fileUtils.concat(area.scripts);
 
       var filename = area.name + '.' + (this.jasperConfig.fileVersion ? this.getFileVersion(content) + '.' : '') + 'min.js';
-      var destMin = path.join(this.jasperConfig.packageOutput, 'scripts', filename);
+      var destMin = path.join(this.jasperConfig.packageOutput, this.scriptsFolder, filename);
+      var clientDestMin = utils.convertPathClient(path.join(this.jasperConfig.baseHref, this.scriptsFolder, filename));
 
       this.scriptsMinifier.minify(content, destMin);
 
-      options.addArea(area.name, area.dependencies, externalScripts.concat(destMin));
+      this.logger.info(`Area script created at '${destMin}'`);
+
+      options.addArea(area.name, area.dependencies, externalScripts.concat(clientDestMin));
     });
     return options;
   }

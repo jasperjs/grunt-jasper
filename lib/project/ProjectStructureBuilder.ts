@@ -49,6 +49,7 @@ export class ProjectStructureBuilder implements IProjectStructureBuilder {
     var result = new project.RoutesConfig();
     result.defaultRoutePath = this.config.defaultRoutePath || '/';
     result.pages = [];
+
     areas.forEach(area => {
       result.pages = result.pages.concat(area.__definitions.filter(d => d.__type.toUpperCase() === 'PAGE'));
     });
@@ -75,7 +76,6 @@ export class ProjectStructureBuilder implements IProjectStructureBuilder {
         __definitions: this.getAreaDefinitions(areaPath, areaName)
       };
 
-
       // if we package our application, we need to collect all html templates
       if (this.config.package) {
         var templates = [];
@@ -83,7 +83,7 @@ export class ProjectStructureBuilder implements IProjectStructureBuilder {
           if (def.templateUrl) {
             var htmlContent = this.fileUtils.readFile(def.templateUrl);
             var templateDefinition = {
-              type: 'template',
+              __type: 'template',
               url: def.templateUrl,
               content: utils.minifyHtml(htmlContent)
             };
@@ -120,9 +120,8 @@ export class ProjectStructureBuilder implements IProjectStructureBuilder {
   }
 
   private mapToDefinition(configPath:string, def:any, areaName:string):project.IProjectDefinition {
-    var type = def.type || 'component';
     var result:project.IProjectDefinition = def;
-    result.__type = type;
+    result.__type = def.type || 'component';
     delete result['type'];
 
     if (!result.name) {
@@ -158,8 +157,8 @@ export class ProjectStructureBuilder implements IProjectStructureBuilder {
       delete result.events;
     }
 
-    if (def.__type.toUpperCase() === 'PAGE') {
-      def.area = areaName;
+    if (result.__type.toUpperCase() === 'PAGE') {
+      result.area = areaName;
     }
     //
     //def.__path = utils.getPath(config);

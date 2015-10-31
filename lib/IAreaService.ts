@@ -11,12 +11,12 @@ export interface IAreaService {
    * Builds _init.js file in area folder
    * @param areaName
    */
-  buildArea(areaName:string);
+  buildArea(areaName:string, structure:structure.IProjectStructure);
 
   /**
    * Build _init.js for all areas found in projet
    */
-  buildAllAreas();
+  buildAllAreas(structure:structure.IProjectStructure);
 
   /**
    *  Build _areas.js client configuration
@@ -27,14 +27,12 @@ export interface IAreaService {
 
 export class AreaService implements IAreaService {
 
-  private structure:structure.IProjectStructure;
-
-  constructor(private fileUtils:f.IFileUtils, private projectStructureBuilder:builder.IProjectStructureBuilder) {
+  constructor(private fileUtils:f.IFileUtils) {
 
   }
 
-  buildArea(areaName:string) {
-    var area = this.getAreaByName(areaName);
+  buildArea(areaName:string, structure:structure.IProjectStructure) {
+    var area = this.getAreaByName(areaName, structure);
     if (!area) {
       throw 'Area with name "' + area + '" not found';
     }
@@ -43,8 +41,8 @@ export class AreaService implements IAreaService {
 
   }
 
-  buildAllAreas() {
-    this.getStructure().areas.forEach(area=> {
+  buildAllAreas(structure:structure.IProjectStructure) {
+    structure.areas.forEach(area=> {
       this.buildInitJsArea(area);
     });
   }
@@ -103,15 +101,8 @@ export class AreaService implements IAreaService {
     return result;
   }
 
-  private getAreaByName(name:string):structure.IAreaDefinition {
-    return this.getStructure().areas['find'](a => a.name === name);
-  }
-
-  private getStructure():structure.IProjectStructure {
-    if (!this.structure) {
-      this.structure = this.projectStructureBuilder.buildStructure();
-    }
-    return this.structure;
+  private getAreaByName(name:string, structure:structure.IProjectStructure):structure.IAreaDefinition {
+    return structure.areas['find'](a => a.name === name);
   }
 
   private componentRegistration(component:structure.IProjectDefinition) {

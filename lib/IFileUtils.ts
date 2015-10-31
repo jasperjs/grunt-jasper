@@ -1,5 +1,6 @@
 import fs = require('fs');
 import glob = require('glob');
+import path = require('path');
 import config = require('./IJasperBuildConfig');
 
 export interface IFileUtils {
@@ -21,8 +22,10 @@ export interface IFileUtils {
 
 export class DefaultFileUtils implements IFileUtils {
 
-  constructor(private config:config.IJasperBuildConfig) {
-
+  constructor(private cwd?: string) {
+    if(!this.cwd){
+      this.cwd = process.cwd();
+    }
   }
 
   readJSON<T>(filename:string):T {
@@ -45,6 +48,10 @@ export class DefaultFileUtils implements IFileUtils {
   }
 
   writeFile(filename:string, data:string) {
+    var directoryPath = path.dirname(filename);
+    if (!this.dirExists(directoryPath)){
+      fs.mkdirSync(directoryPath);
+    }
     return fs.writeFileSync(filename, data, {encoding: 'utf8'});
   }
 
@@ -58,7 +65,7 @@ export class DefaultFileUtils implements IFileUtils {
   }
 
   expand(pattern:string):string[] {
-    return glob.sync(pattern, {cwd: this.config.cwd});
+    return glob.sync(pattern, {cwd: this.cwd});
   }
 
   concat(filenames:string[]):string {
@@ -71,5 +78,14 @@ export class DefaultFileUtils implements IFileUtils {
       buffer += this.readFile(filename);
     });
     return buffer;
+  }
+
+  private dirExists(folderpath: string): boolean{
+    try {
+      return fs.statSync(folderpath).isDirectory();
+    }
+    catch (err) {
+      return false;
+    }
   }
 }

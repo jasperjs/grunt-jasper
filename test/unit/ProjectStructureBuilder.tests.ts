@@ -10,7 +10,7 @@ export function setUp(done:Function) {
   buildConfig.appPath = 'test/testApp';
   buildConfig.values = 'test/testApp/config/debug.json';
 
-  var utils = new f.DefaultFileUtils(buildConfig);
+  var utils = new f.DefaultFileUtils();
   var scriptsFinder = new finder.TypeScriptFinder(utils);
   var stylesFinder = new finder.CssFinder(utils);
   projectStructureBuilder = new builder.ProjectStructureBuilder(utils, buildConfig, scriptsFinder, stylesFinder)
