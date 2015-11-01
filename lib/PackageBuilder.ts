@@ -11,6 +11,8 @@ import crypto = require('crypto');
 
 import log = require('./ILogger');
 
+import patches = require('./SinglePagePatch');
+
 export interface IPackageBuilder {
 
   packageApp(structure:project.IProjectStructure);
@@ -31,7 +33,7 @@ export class PackageBuilder implements IPackageBuilder {
 
   packageApp(structure:project.IProjectStructure) {
 
-    this.packageStyles(structure);
+    var styles = this.packageStyles(structure);
 
     var areasConfig = this.packageAreasScripts(structure);
 
@@ -40,6 +42,8 @@ export class PackageBuilder implements IPackageBuilder {
 
     this.logger.info(`Base script created at '${baseMinPath}'`);
     this.logger.info(`Startup script created at '${startupMinPath}'`);
+
+    this.patchSinglePage([baseMinPath, startupMinPath], styles);
   }
 
   private packageBaseScripts():string {
@@ -77,14 +81,14 @@ export class PackageBuilder implements IPackageBuilder {
   /**
    *  Search all app files
    */
-  private packageStyles(structure:project.IProjectStructure) {
+  private packageStyles(structure:project.IProjectStructure): string[] {
     this.logger.info('Packaging styles...');
 
     // build CSS styles:
     var stylesMinDest = path.join(this.jasperConfig.packageOutput, 'styles');
 
     //Determine application css targets
-    var cssTargets = this.getCssTargets();
+    var cssTargets = structure.cssTargets;
 
     var lastTarget = cssTargets[cssTargets.length - 1];
 
@@ -92,11 +96,15 @@ export class PackageBuilder implements IPackageBuilder {
       lastTarget.files = lastTarget.files.concat(area.__styles);
     });
 
+    var result = [];
     cssTargets.forEach(target => {
       var cssPath = path.join(stylesMinDest, target.filename);
       this.cssMinifier.minifyCss(target.files, cssPath);
       this.logger.info(`Styles created at '${cssPath}'`);
+
+      result.push(cssPath);
     });
+    return result;
   }
 
   /**
@@ -124,24 +132,6 @@ export class PackageBuilder implements IPackageBuilder {
     return options;
   }
 
-  private getCssTargets():{files: string[], filename: string}[] {
-    var cssConfig = this.jasperConfig.baseCss;
-    if (!Array.isArray(cssConfig)) {
-      var result = [];
-      for (var prop in cssConfig) {
-        result.push({
-          filename: prop,
-          files: cssConfig[prop]
-        })
-      }
-      return result;
-    }
-    return [{
-      filename: 'all.min.css',
-      files: <string[]>cssConfig
-    }];
-  }
-
   private getFileVersion(content:string) {
     return crypto.createHash('md5').update(content).digest('hex');
   }
@@ -163,6 +153,14 @@ export class PackageBuilder implements IPackageBuilder {
       }
     }
     return result;
+  }
+
+  private patchSinglePage(scripts: string[], styles: string[]) {
+    var patch = new patches.SinglePagePatch(this.fileUtils);
+    var content = patch.applyPatch(this.jasperConfig.singlePage, this.jasperConfig.baseHref, scripts, styles);
+    // override
+    var indexPath = path.join(this.jasperConfig.packageOutput, 'index.html');
+    this.fileUtils.writeFile(indexPath, content);
   }
 
 }

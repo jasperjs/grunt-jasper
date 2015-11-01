@@ -11,6 +11,8 @@ buildConfig.values = 'test/testApp/config/debug.json';
 buildConfig.baseScripts = ['test/testApp/vendor/jquery.js', 'test/testApp/vendor/angular.js'];
 buildConfig.startup = 'test/testApp/app/bootstrap.js';
 buildConfig.baseHref = '/rootpath/';
+buildConfig.singlePage = 'test/testApp/index.html';
+
 buildConfig.jDebugEnabled = true;
 
 buildConfig.baseCss = {
@@ -132,8 +134,6 @@ export function testRoutesConfig(test:nodeunit.Test) {
   test.equals(configObject.defaultRoutePath, '/');
   test.ok(configObject.routes);
 
-  console.log(configObject);
-
   test.equals(configObject.routes['/'].templateUrl, '#_page_homePage');
   test.equals(configObject.routes['/'].area, 'core');
 
@@ -153,6 +153,38 @@ export function testValuesConfig(test:nodeunit.Test) {
 
   ensurePartsExistence(test, valuesModuleContent, contentParts);
 
+  test.done();
+}
+
+export function testIndexPageScripts(test:nodeunit.Test) {
+  var scripts = buildConfig.baseScripts;
+  scripts.push('node_modules/jdebug/lib/jdebug.js'); // jDebug script
+
+  var indexPageContent = fileUtils.readFile(buildConfig.singlePage);
+  var parts = [];
+  scripts.forEach(function (path) {
+    parts.push('<script src="/rootpath/' + path.replace(/\\/g, '/') + '"></script>');
+  });
+
+  ensurePartsExistence(test, indexPageContent, parts);
+
+  test.done();
+}
+
+export function testIndexPageStyles(test:nodeunit.Test) {
+  var indexPageContent = fileUtils.readFile(buildConfig.singlePage);
+
+  var styles = fileUtils.expand(path.join(buildConfig.singlePage, '/**/*.css'));
+
+  styles.push('node_modules/jdebug/lib/jdebug.css');//jDebug styles
+  styles.push('test/testApp/base.css');
+  styles.push('test/testApp/bootstrap.css');
+
+  var parts = [];
+  styles.forEach(function (path) {
+    parts.push('<link rel="stylesheet" href="/rootpath/' + path.replace(/\\/g, '/') + '"/>');
+  });
+  ensurePartsExistence(test, indexPageContent, parts);
 
   test.done();
 }

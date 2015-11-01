@@ -12,6 +12,7 @@ buildConfig.packageOutput = 'test/testApp/dist';
 buildConfig.baseScripts = ['test/testApp/vendor/jquery.js', 'test/testApp/vendor/angular.js'];
 buildConfig.startup = 'test/testApp/app/bootstrap.js';
 buildConfig.baseHref = '/rootpath/';
+buildConfig.singlePage = 'test/testApp/index.html';
 
 buildConfig.baseCss = {
   'bootstrap.min.css': [
@@ -128,6 +129,20 @@ export function testPackageAreasContainsTemplates(test: nodeunit.Test){
 
   test.done();
 }
+
+export function testIndexPageReferences(test: nodeunit.Test){
+  //styles
+  expectFileContent(test, 'index.html', '<link rel="stylesheet" href="/rootpath/test/testApp/dist/styles/bootstrap.min.css"/>');
+  expectFileContent(test, 'index.html', '<link rel="stylesheet" href="/rootpath/test/testApp/dist/styles/all.min.css"/>');
+
+  //scripts
+  expectFileContent(test, 'index.html', '<script src="/rootpath/test/testApp/dist/scripts/_base');
+  expectFileContent(test, 'index.html', '<script src="/rootpath/test/testApp/dist/scripts/_startup');
+
+  test.done();
+}
+
+//
 
 function fileExists(filename:string):boolean {
   return fileUtils.fileExists(path.join(buildConfig.packageOutput, filename));

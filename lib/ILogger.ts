@@ -1,21 +1,21 @@
 export interface ILogger{
-  info(message: string, ...params: any[]);
-  warn(message: string, ...params: any[]);
-  error(message: string, ...params: any[]);
+  info(message: string);
+  warn(message: string);
+  error(message: string);
 }
 
 export class DefaultLogger implements ILogger{
 
-  info(message: string, ...params: any[]){
-    console.log(message, params);
+  info(message: string){
+    console.log(message);
   }
 
-  warn(message: string, ...params: any[]){
-    console.error(message, params)
+  warn(message: string){
+    console.error(message)
   }
 
-  error(message: string, ...params: any[]){
-    console.error(message, params)
+  error(message: string){
+    console.error(message)
   }
 
 }

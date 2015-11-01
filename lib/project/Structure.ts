@@ -75,6 +75,13 @@ export interface IProjectStructure {
   routes: RoutesConfig;
 
   values: ValuesConfig;
+
+  cssTargets: ICssTarget[];
+}
+
+export interface ICssTarget{
+  files: string[];
+  filename: string;
 }
 
 export interface IJDebugInfo{

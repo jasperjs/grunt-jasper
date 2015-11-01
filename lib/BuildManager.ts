@@ -6,6 +6,7 @@ import struct = require('./project/Structure');
 import areas = require('./IAreaService');
 
 import path = require('path');
+import patches = require('./SinglePagePatch');
 
 export class BuildManager {
 
@@ -33,6 +34,8 @@ export class BuildManager {
   }
 
   buildProject() {
+    this.root.logger.info('Building jasper application...');
+
     this.buildConfig.package = false;
     var structure = this.projectStructureBuilder.buildStructure();
     // build _init.js file of all areas
@@ -43,13 +46,13 @@ export class BuildManager {
     //_routes.js
     var routesConfigPath = this.buildRoutesConfig(structure);
     //_values.js
-    var routesConfigPath : string = null;
-    if(structure.values){
-      routesConfigPath = this.buildValuesConfig(structure);
+    var valuesConfigPath:string = null;
+    if (structure.values) {
+      valuesConfigPath = this.buildValuesConfig(structure);
     }
 
-
-
+    this.patchSinglePage(structure, areaConfigPath, routesConfigPath, valuesConfigPath);
+    this.root.logger.info('Build success.');
   }
 
   packageProject() {
@@ -83,5 +86,40 @@ export class BuildManager {
     return areasConfigPath;
   }
 
+  private patchSinglePage(structure:struct.IProjectStructure, areaConfigPath:string, routesConfigPath:string, valuesConfigPath:string) {
+    var patch = new patches.SinglePagePatch(this.root.fileUtils);
+
+    var scripts = this.buildConfig.baseScripts || [];
+    scripts.push(areaConfigPath);
+    scripts.push(routesConfigPath);
+    if (valuesConfigPath) {
+      scripts.push(valuesConfigPath);
+    }
+
+    scripts.push(this.buildConfig.startup);
+
+    if (this.buildConfig.jDebugEnabled) {
+      scripts.push(this.buildConfig.jDebugSrc);
+    }
+
+    // search all app styles, first determined in config
+    var styles = [];
+    structure.cssTargets.forEach(target=>{
+      styles = styles.concat(target.files);
+    });
+    // then append all areas styles
+    structure.areas.forEach(area => {
+      styles = styles.concat(area.__styles);
+    });
+
+    if (this.buildConfig.jDebugEnabled && this.buildConfig.jDebugStylePath) {
+      styles.push(this.buildConfig.jDebugStylePath);
+    }
+
+    var content = patch.applyPatch(this.buildConfig.singlePage, this.buildConfig.baseHref, scripts, styles);
+
+    // override
+    this.root.fileUtils.writeFile(this.buildConfig.singlePage, content);
+  }
 
 }

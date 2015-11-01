@@ -23,7 +23,8 @@ export class ProjectStructureBuilder implements IProjectStructureBuilder {
     return {
       areas: areas,
       routes: this.buildRoutesConfig(areas),
-      values: this.buildValues()
+      values: this.buildValues(),
+      cssTargets: this.getCssTargets()
     };
   }
 
@@ -186,6 +187,24 @@ export class ProjectStructureBuilder implements IProjectStructureBuilder {
       scripts: this.scriptsFinder.find(folder),
       styles: this.stylesFinder.find(folder)
     }
+  }
+
+  private getCssTargets(): project.ICssTarget[] {
+    var cssConfig = this.config.baseCss;
+    if (!Array.isArray(cssConfig)) {
+      var result = [];
+      for (var prop in cssConfig) {
+        result.push({
+          filename: prop,
+          files: cssConfig[prop]
+        })
+      }
+      return result;
+    }
+    return [{
+      filename: 'all.min.css',
+      files: <string[]>cssConfig
+    }];
   }
 
 }
