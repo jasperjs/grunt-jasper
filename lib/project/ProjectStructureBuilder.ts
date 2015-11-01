@@ -128,10 +128,6 @@ export class ProjectStructureBuilder implements IProjectStructureBuilder {
       result.name = utils.camelCaseTagName(utils.getParentFolderName(configPath));
     }
 
-    if (!this.config.package && this.config.jDebugEnabled) {
-      result.jDebug = this.buildJDebugInfo(configPath);
-    }
-
     if (result.properties || result.events) {
       if (result.properties) {
         result.properties = utils.splitStringBySpace(result.properties);
@@ -175,6 +171,11 @@ export class ProjectStructureBuilder implements IProjectStructureBuilder {
       var content = this.fileUtils.readFile(result.templateUrl);
       result.content = utils.minifyHtml(content);
     }
+
+    if (!this.config.package && this.config.jDebugEnabled) {
+      result.jDebug = this.buildJDebugInfo(configPath);
+    }
+
     return result;
   }
 

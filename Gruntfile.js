@@ -46,13 +46,11 @@ module.exports = function (grunt) {
     // Before generating any new files, remove any previously-created files.
     clean: {
       tests: [
-        'test/testApp/app/_routes.debug.js',
-        'test/testApp/app/_areas.debug.js',
-        'test/testApp/app/_values.debug.js',
-        'test/testApp/app/_values.release.js',
-        'test/testApp/app/_areas.release.js',
-        'test/testApp/app/_routes.release.js',
-        'test/testApp/dist/**/*.*'
+        'test/testApp/app/_values.js',
+        'test/testApp/app/_areas.js',
+        'test/testApp/app/_routes.js',
+        'test/testApp/dist/**/*.*',
+        'test/testApp/**/_init.js'
       ]
     },
 
@@ -114,7 +112,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test-package', ['clean', 'typescript', 'nodeunit:package']);
 
-  grunt.registerTask('test', [/*'test-build', */'test-package']);
+  grunt.registerTask('test', ['test-build', 'test-package']);
 
   // By default, lint and run all tests.
   grunt.registerTask('default', ['jasper']);

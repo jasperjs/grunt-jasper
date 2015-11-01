@@ -63,7 +63,7 @@ export class AreaService implements IAreaService {
 
     this.fileUtils.writeFile(initFilePath, areaScript);
 
-    area.scripts.push(initFilePath);
+    area.scripts.push(utils.convertPathClient(initFilePath));
 
   }
 
@@ -87,7 +87,7 @@ export class AreaService implements IAreaService {
         result = this.templateRegistration(def.url, def.content);
         break;
       case "PAGE":
-        var pageTemplateUrl = `#_page_${def.name}`;
+        var pageTemplateUrl = def.templateUrl = `#_page_${def.name}`;
         var tagName = utils.shakeCase(def.name);
         var pageTemplate = `<${tagName}></${tagName}>`;
         // register page template and the page component

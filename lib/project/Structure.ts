@@ -143,12 +143,12 @@ export class RoutesConfig {
   toClientConfigScript(): string{
     var config = {};
     this.pages.forEach(page=>{
-      config[page.name] = page;
+      config[page.route] = page;
       delete page.__type;
     });
     return `angular.module('jasperRouteConfig',['jasper'])
       .config(['jasperRouteProvider', function(jasperRouteTable) {
-        jasperRouteTable.setup({'defaultRoutePath':'${this.defaultRoutePath}','routes': ${JSON.stringify(config)}});
+        jasperRouteTable.setup({"defaultRoutePath":"${this.defaultRoutePath}","routes": ${JSON.stringify(config)}});
       }]);`
   }
 }
@@ -163,10 +163,10 @@ export class ValuesConfig {
     var registrationScript = '';
 
     this.values.forEach(pair => {
-      registrationScript += `v.register('${pair.key}','${JSON.stringify(pair.value)}');`
+      registrationScript += `v.register("${pair.key}", ${JSON.stringify(pair.value)});`
     });
 
-    return `angular.module('jasperValuesConfig',['jasper'])
+    return `angular.module("jasperValuesConfig",["jasper"])
       .config(["jasperConstantProvider", function(v){${registrationScript}}]);`;
   }
 }

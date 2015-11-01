@@ -43,7 +43,7 @@ exports.jasper = {
     this.config = getConfig();
     done();
   },
-
+ //TODO
   testIndexPageScripts: function (test) {
     var scripts = this.config.baseScripts;
     scripts.push('node_modules/jdebug/lib/jdebug.js'); // jDebug script
@@ -57,7 +57,7 @@ exports.jasper = {
 
     test.done();
   },
-
+//TODO
   testIndexPageStyles: function (test) {
     var indexPageContent = grunt.file.read(path.join(appPath, 'index.html'));
     var styles = grunt.file.expand(path.join(appPath, '/app/**/*.css'));

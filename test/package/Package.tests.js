@@ -4,7 +4,7 @@ var file = require('../../lib/IFileUtils');
 var path = require('path');
 var fileUtils = new file.DefaultFileUtils();
 var buildConfig = new config.DefaultBuildConfig();
-buildConfig.appPath = 'test/testApp';
+buildConfig.appPath = 'test/testApp/app';
 buildConfig.values = 'test/testApp/config/debug.json';
 buildConfig.packageOutput = 'test/testApp/dist';
 buildConfig.baseScripts = ['test/testApp/vendor/jquery.js', 'test/testApp/vendor/angular.js'];
@@ -80,23 +80,55 @@ function testHtmlCommentRemoving(test) {
     test.done();
 }
 exports.testHtmlCommentRemoving = testHtmlCommentRemoving;
+function testAreaInitScriptsInAreaFiles(test) {
+    expectFileContentGlob(test, 'scripts/core.*.min.js', 'jsp.areas.initArea("core",function()');
+    expectFileContentGlob(test, 'scripts/feature.*.min.js', 'jsp.areas.initArea("feature",function()');
+    expectFileContentGlob(test, 'scripts/boot.*.min.js', 'jsp.areas.initArea("boot",function()');
+    //
+    test.done();
+}
+exports.testAreaInitScriptsInAreaFiles = testAreaInitScriptsInAreaFiles;
+function testEpcapingSlash(test) {
+    var coreFileContent = readFileGlob('scripts/core.*.min.js');
+    test.ok(coreFileContent.indexOf('\\\\testattrvalue\\\\') > 0, 'core.min.js must escape slash');
+    test.done();
+}
+exports.testEpcapingSlash = testEpcapingSlash;
+function testCorePackagedAreaMustContainsExternalScript(test) {
+    var coreFileContent = readFileGlob('scripts/core.*.min.js');
+    test.ok(coreFileContent.indexOf('console.log("custom script");') === 0, 'core.min.js must contains external script at first');
+    test.done();
+}
+exports.testCorePackagedAreaMustContainsExternalScript = testCorePackagedAreaMustContainsExternalScript;
+function testPackageAreasContainsTemplates(test) {
+    expectFileContentGlob(test, 'scripts/core.*.min.js', '<p>custom template</p>');
+    expectFileContentGlob(test, 'scripts/core.*.min.js', 'jsp.template("test/testApp/app/core/components/site-footer/site-footer.html",');
+    expectFileContentGlob(test, 'scripts/feature.*.min.js', 'jsp.template("test/testApp/app/feature/components/feature-tag/feature-tag.html"');
+    expectFileContentGlob(test, 'scripts/boot.*.min.js', 'jsp.template("test/testApp/app/boot/components/feature-tag/boot-tag.html"');
+    test.done();
+}
+exports.testPackageAreasContainsTemplates = testPackageAreasContainsTemplates;
 function fileExists(filename) {
-    return fileUtils.fileExists(path.join('test/testApp/dist', filename));
+    return fileUtils.fileExists(path.join(buildConfig.packageOutput, filename));
 }
 function fileExistsGlob(mask) {
-    mask = path.join('test/testApp/dist', mask);
+    mask = path.join(buildConfig.packageOutput, mask);
     var files = fileUtils.expand(mask);
     return files.length === 1;
 }
 function readFileGlob(mask) {
-    mask = path.join('test/testApp/dist', mask);
+    mask = path.join(buildConfig.packageOutput, mask);
     var files = fileUtils.expand(mask);
     return fileUtils.readFile(files[0]);
 }
 function expectFileContent(test, filename, content) {
-    var filepath = path.join('test/testApp/dist', filename);
+    var filepath = path.join(buildConfig.packageOutput, filename);
     var fileContent = fileUtils.readFile(filepath);
     return test.ok(fileContent.indexOf(content) >= 0, "File content '" + content + "' not found in file '" + filepath + "'");
+}
+function expectFileContentGlob(test, filename, content) {
+    var fileContent = readFileGlob(filename);
+    expectContent(test, fileContent, content);
 }
 function expectContent(test, allContent, content) {
     return test.ok(allContent.indexOf(content) >= 0, "Content part '" + content + "' not found in '" + allContent + "'");
