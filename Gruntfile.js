@@ -47,6 +47,6 @@ module.exports = function (grunt) {
   });
 
 
-  grunt.registerTask('default', ['typescript:lib', 'jasper:debug']);
+  grunt.registerTask('default', ['typescript:lib', 'jasper']);
 
 };

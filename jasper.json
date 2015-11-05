@@ -1,0 +1,22 @@
+{
+  "baseCss": {
+    "bootstrap.min.css": [
+      "vendor/bootstrap/css/bootstrap.min.css",
+      "vendor/searchpickerjs/searchPicker.min.css"
+    ],
+    "all.min.css": [
+      "css/layouts.css"
+    ]
+  },
+  "baseScripts": [
+    "vendor/angularjs/angular.js",
+    "vendor/angularjs/angular-route.min.js"
+  ],
+
+  "jDebugEnabled": true,
+
+  "appPath": "test/testApp/app",
+  "singlePage": "test/testApp/index.html",
+  "packageOutput": "dist",
+  "startup": "test/testApp/app/boostrap.js"
+}

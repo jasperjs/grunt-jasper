@@ -1,0 +1,7 @@
+﻿{
+    "templateFile": "site-header.html",
+    "type": "component",
+    "ctrl": "spa.core.components.SiteHeader",
+    "properties": "myAttr",
+    "events": "click"
+}

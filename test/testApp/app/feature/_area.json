@@ -1,0 +1,7 @@
+﻿{
+    "name": "feature",
+    "bootstrap": false,
+    "dependencies": [ 
+        "core"
+    ]
+}

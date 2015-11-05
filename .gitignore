@@ -5,6 +5,10 @@ Thumbs.db
 
 .idea
 tsconfig.json
-lib/**/*.js
 
 dist
+
+test/testApp/**/_areas.js
+test/testApp/**/_values.js
+test/testApp/**/_routes.js
+test/testApp/dist

@@ -1,0 +1,20 @@
+{
+
+  "arrayValue": [
+    {
+      "prop1": "test"
+    },
+    {
+      "prop2": "test 2"
+    }
+  ],
+
+  "numberValue": 200,
+
+  "stringValue": "test string",
+
+  "objectValue": {
+    "title": "test"
+  }
+
+}
