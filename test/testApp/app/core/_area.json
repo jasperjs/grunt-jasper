@@ -1,9 +1,0 @@
-﻿{
-  "name": "core",
-  "bootstrap": false,
-  "scripts": [
-    "test/testApp/scripts/custom.js",
-    "//path/to/external/script.js",
-    "http://another.path/to/external/script.js"
-  ]
-}
