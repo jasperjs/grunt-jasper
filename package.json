@@ -31,6 +31,6 @@
     "test": "grunt"
   },
   "dependencies": {
-    "jasper-build": "^0.1.30"
+    "jasper-build": "^0.1.32"
   }
 }
